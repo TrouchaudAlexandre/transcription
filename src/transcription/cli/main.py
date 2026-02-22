@@ -6,6 +6,7 @@ import sys
 
 from transcription.application.run_download import run_download
 from transcription.application.run_segment import run_segment
+from transcription.application.run_transcribe import run_transcribe
 from transcription.config.settings import load_settings, override_settings
 
 
@@ -26,7 +27,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--step",
         default="download",
-        choices=["download", "segment"],
+        choices=["download", "segment", "transcribe"],
         help="Pipeline step to execute.",
     )
     return parser
@@ -58,6 +59,8 @@ def main() -> None:
             run_download(settings)
         if args.step == "segment":
             run_segment(settings)
+        if args.step == "transcribe":
+            run_transcribe(settings)
     except RuntimeError as exc:
         print(f"Runtime error: {exc}", file=sys.stderr)
         print(
@@ -69,6 +72,13 @@ def main() -> None:
         print(f"Subprocess failed: {exc}", file=sys.stderr)
         print(
             "Check that ffmpeg and ffprobe are installed and available in PATH.",
+            file=sys.stderr,
+        )
+        raise SystemExit(1) from exc
+    except FileNotFoundError as exc:
+        print(f"Command not found: {exc}", file=sys.stderr)
+        print(
+            "Check that `whisper`, `ffmpeg`, and `ffprobe` are installed and available in PATH.",
             file=sys.stderr,
         )
         raise SystemExit(1) from exc

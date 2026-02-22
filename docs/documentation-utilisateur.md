@@ -61,7 +61,7 @@ PYTHONPATH=/home/20104112/Documents/Perso/project/transcription/src \
   --files-list-csv "/content/drive/MyDrive/Colab Notebooks/ressource/files_list.csv"
 ```
 
-Important: au stade actuel (T5), les etapes `download` et `segment` sont implementees.
+Important: au stade actuel (T6), les etapes `download`, `segment` et `transcribe` sont implementees.
 Si `pytube` n'est pas installe, la CLI retourne une erreur explicite sur `download`.
 
 ## Workflow cible (une fois toutes les briques V1 terminees)
@@ -86,6 +86,27 @@ Prerequis systeme:
 Comportement:
 - Segmente les fichiers audio `downloaded=true` et `segmented=false`.
 - Met a jour l'etat CSV en `segmented=true` (audio et video associee si presente).
+
+## Transcription (T6)
+Commande:
+```bash
+PYTHONPATH=src python -m transcription.cli.main \
+  --step transcribe \
+  --files-list-csv "/content/drive/MyDrive/Colab Notebooks/ressource/files_list.csv" \
+  --segmentation-root "/content/drive/MyDrive/Colab Notebooks/ressource/segmentation" \
+  --transcription-root "/content/drive/MyDrive/Colab Notebooks/creation/transcription" \
+  --whisper-model "large-v3-turbo" \
+  --language "Arabic"
+```
+
+Prerequis:
+- `whisper` installe en CLI (package `openai-whisper`).
+- `ffmpeg` / `ffprobe` disponibles.
+
+Comportement:
+- Transcrit les segments audio issus de la segmentation.
+- Si aucun segment n'est trouve, transcrit le fichier audio source.
+- Met a jour l'etat CSV en `transcribed=true` (audio et video associee si presente).
 
 ## Tests
 Commande:
@@ -114,3 +135,4 @@ Checklist minimale par ticket:
 - T4: ajout de la brique download YouTube (`pytube`) avec reprise via `files_list.csv` et option CLI `--step download`.
 - Etape qualite: ajout des tests unitaires et mesure de couverture >= 60%.
 - T5: ajout de la brique segmentation audio (`ffmpeg`) avec option CLI `--step segment`.
+- T6: ajout de la brique transcription Whisper avec option CLI `--step transcribe`.
