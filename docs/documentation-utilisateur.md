@@ -61,7 +61,7 @@ PYTHONPATH=/home/20104112/Documents/Perso/project/transcription/src \
   --files-list-csv "/content/drive/MyDrive/Colab Notebooks/ressource/files_list.csv"
 ```
 
-Important: au stade actuel (T6), les etapes `download`, `segment` et `transcribe` sont implementees.
+Important: au stade actuel (T7), les etapes `download`, `segment`, `transcribe` et `merge` sont implementees.
 Si `pytube` n'est pas installe, la CLI retourne une erreur explicite sur `download`.
 
 ## Workflow cible (une fois toutes les briques V1 terminees)
@@ -108,6 +108,24 @@ Comportement:
 - Si aucun segment n'est trouve, transcrit le fichier audio source.
 - Met a jour l'etat CSV en `transcribed=true` (audio et video associee si presente).
 
+## Merge SRT (T7)
+Commande:
+```bash
+PYTHONPATH=src python -m transcription.cli.main \
+  --step merge \
+  --files-list-csv "/content/drive/MyDrive/Colab Notebooks/ressource/files_list.csv" \
+  --transcription-root "/content/drive/MyDrive/Colab Notebooks/creation/transcription" \
+  --output-root "/content/drive/MyDrive/Colab Notebooks/creation/resultat" \
+  --segment-length-seconds 60
+```
+
+Comportement:
+- Trie les `.srt` par `part_n`.
+- Recale les timestamps avec l'offset de segment (`segment_length_seconds`).
+- Renumerote les entrees.
+- Produit un fichier final par audio:
+  - `<OUTPUT_ROOT>/<playlist>/<audio_stem>_sous-titres_complets.srt`
+
 ## Tests
 Commande:
 ```bash
@@ -136,3 +154,4 @@ Checklist minimale par ticket:
 - Etape qualite: ajout des tests unitaires et mesure de couverture >= 60%.
 - T5: ajout de la brique segmentation audio (`ffmpeg`) avec option CLI `--step segment`.
 - T6: ajout de la brique transcription Whisper avec option CLI `--step transcribe`.
+- T7: ajout de la brique merge SRT avec option CLI `--step merge`.

@@ -5,6 +5,7 @@ import subprocess
 import sys
 
 from transcription.application.run_download import run_download
+from transcription.application.run_merge import run_merge
 from transcription.application.run_segment import run_segment
 from transcription.application.run_transcribe import run_transcribe
 from transcription.config.settings import load_settings, override_settings
@@ -27,7 +28,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--step",
         default="download",
-        choices=["download", "segment", "transcribe"],
+        choices=["download", "segment", "transcribe", "merge"],
         help="Pipeline step to execute.",
     )
     return parser
@@ -61,6 +62,8 @@ def main() -> None:
             run_segment(settings)
         if args.step == "transcribe":
             run_transcribe(settings)
+        if args.step == "merge":
+            run_merge(settings)
     except RuntimeError as exc:
         print(f"Runtime error: {exc}", file=sys.stderr)
         print(
