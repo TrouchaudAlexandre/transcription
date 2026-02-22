@@ -61,14 +61,31 @@ PYTHONPATH=/home/20104112/Documents/Perso/project/transcription/src \
   --files-list-csv "/content/drive/MyDrive/Colab Notebooks/ressource/files_list.csv"
 ```
 
-Important: au stade actuel (T4), seule l'etape `download` est implementee.
-Si `pytube` n'est pas installe, la CLI retourne une erreur explicite.
+Important: au stade actuel (T5), les etapes `download` et `segment` sont implementees.
+Si `pytube` n'est pas installe, la CLI retourne une erreur explicite sur `download`.
 
 ## Workflow cible (une fois toutes les briques V1 terminees)
 1. Download des medias de playlist.
 2. Segmentation audio.
 3. Transcription Whisper.
 4. Fusion SRT.
+
+## Segmentation (T5)
+Commande:
+```bash
+PYTHONPATH=src python -m transcription.cli.main \
+  --step segment \
+  --files-list-csv "/content/drive/MyDrive/Colab Notebooks/ressource/files_list.csv" \
+  --segmentation-root "/content/drive/MyDrive/Colab Notebooks/ressource/segmentation"
+```
+
+Prerequis systeme:
+- `ffmpeg`
+- `ffprobe`
+
+Comportement:
+- Segmente les fichiers audio `downloaded=true` et `segmented=false`.
+- Met a jour l'etat CSV en `segmented=true` (audio et video associee si presente).
 
 ## Tests
 Commande:
@@ -96,3 +113,4 @@ Checklist minimale par ticket:
 - T3: ajout de la configuration `.env` + surcharge CLI, sans pipeline branche.
 - T4: ajout de la brique download YouTube (`pytube`) avec reprise via `files_list.csv` et option CLI `--step download`.
 - Etape qualite: ajout des tests unitaires et mesure de couverture >= 60%.
+- T5: ajout de la brique segmentation audio (`ffmpeg`) avec option CLI `--step segment`.

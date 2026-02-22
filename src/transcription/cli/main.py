@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import argparse
+import subprocess
 import sys
 
 from transcription.application.run_download import run_download
+from transcription.application.run_segment import run_segment
 from transcription.config.settings import load_settings, override_settings
 
 
@@ -24,8 +26,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--step",
         default="download",
-        choices=["download"],
-        help="Pipeline step to execute. T4 supports download only.",
+        choices=["download", "segment"],
+        help="Pipeline step to execute.",
     )
     return parser
 
@@ -51,16 +53,25 @@ def main() -> None:
         use_mock=args.use_mock,
     )
 
-    if args.step == "download":
-        try:
+    try:
+        if args.step == "download":
             run_download(settings)
-        except RuntimeError as exc:
-            print(f"Runtime error: {exc}", file=sys.stderr)
-            print(
-                "Install missing dependencies in your environment, e.g. `pip install pytube python-dotenv`.",
-                file=sys.stderr,
-            )
-            raise SystemExit(1) from exc
+        if args.step == "segment":
+            run_segment(settings)
+    except RuntimeError as exc:
+        print(f"Runtime error: {exc}", file=sys.stderr)
+        print(
+            "Install missing dependencies in your environment, e.g. `pip install pytube python-dotenv`.",
+            file=sys.stderr,
+        )
+        raise SystemExit(1) from exc
+    except subprocess.CalledProcessError as exc:
+        print(f"Subprocess failed: {exc}", file=sys.stderr)
+        print(
+            "Check that ffmpeg and ffprobe are installed and available in PATH.",
+            file=sys.stderr,
+        )
+        raise SystemExit(1) from exc
 
 
 if __name__ == "__main__":
