@@ -17,6 +17,11 @@ Ce projet automatise la transcription de videos YouTube (playlist) avec Whisper,
 - Outils systeme: `ffmpeg`.
 - Dependances Python (a finaliser dans les prochains tickets): `python-dotenv`, `pytube`, `openai-whisper`.
 
+Installation rapide:
+```bash
+pip install python-dotenv pytube
+```
+
 ## Configuration
 Les valeurs par defaut sont dans `src/transcription/config/settings.py`.
 
@@ -38,14 +43,26 @@ Variables principales:
 Point d'entree:
 - `src/transcription/cli/main.py`
 
-Commande type:
+Commande type (depuis la racine du projet):
 ```bash
 PYTHONPATH=src python -m transcription.cli.main \
+  --step download \
   --playlist-csv /content/drive/MyDrive/Colab\ Notebooks/ressource/playlists.csv \
   --files-list-csv /content/drive/MyDrive/Colab\ Notebooks/ressource/files_list.csv
 ```
 
-Important: au stade actuel (T3), la CLI charge et affiche la configuration. Le pipeline complet sera branche dans les tickets suivants.
+Commande type (robuste, meme hors racine du projet):
+```bash
+PYTHONPATH=/home/20104112/Documents/Perso/project/transcription/src \
+/home/20104112/Documents/Perso/project/transcription/.venv/bin/python \
+  -m transcription.cli.main \
+  --step download \
+  --playlist-csv "/content/drive/MyDrive/Colab Notebooks/ressource/playlists.csv" \
+  --files-list-csv "/content/drive/MyDrive/Colab Notebooks/ressource/files_list.csv"
+```
+
+Important: au stade actuel (T4), seule l'etape `download` est implementee.
+Si `pytube` n'est pas installe, la CLI retourne une erreur explicite.
 
 ## Workflow cible (une fois toutes les briques V1 terminees)
 1. Download des medias de playlist.
@@ -64,3 +81,4 @@ Checklist minimale par ticket:
 
 ## Historique des mises a jour
 - T3: ajout de la configuration `.env` + surcharge CLI, sans pipeline branche.
+- T4: ajout de la brique download YouTube (`pytube`) avec reprise via `files_list.csv` et option CLI `--step download`.

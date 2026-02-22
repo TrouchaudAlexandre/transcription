@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import sys
 
+from transcription.application.run_download import run_download
 from transcription.config.settings import load_settings, override_settings
 
 
@@ -19,6 +21,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--whisper-model")
     parser.add_argument("--language")
     parser.add_argument("--use-mock")
+    parser.add_argument(
+        "--step",
+        default="download",
+        choices=["download"],
+        help="Pipeline step to execute. T4 supports download only.",
+    )
     return parser
 
 
@@ -43,8 +51,16 @@ def main() -> None:
         use_mock=args.use_mock,
     )
 
-    # TODO: Wire the pipeline once the use cases are implemented.
-    print(settings)
+    if args.step == "download":
+        try:
+            run_download(settings)
+        except RuntimeError as exc:
+            print(f"Runtime error: {exc}", file=sys.stderr)
+            print(
+                "Install missing dependencies in your environment, e.g. `pip install pytube python-dotenv`.",
+                file=sys.stderr,
+            )
+            raise SystemExit(1) from exc
 
 
 if __name__ == "__main__":
