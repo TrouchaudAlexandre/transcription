@@ -137,6 +137,10 @@ Etapes:
 Fichier de configuration type:
 - `.env.example`
 
+## Documentation principale
+Le guide principal d'utilisation est maintenant dans:
+- `README.md`
+
 ## Tests
 Commande:
 ```bash
@@ -167,3 +171,4 @@ Checklist minimale par ticket:
 - T6: ajout de la brique transcription Whisper avec option CLI `--step transcribe`.
 - T7: ajout de la brique merge SRT avec option CLI `--step merge`.
 - T8: ajout du runner Colab minimal et du fichier `.env.example`.
+- T9: ajout de `README.md` avec guide complet d'utilisation (local + Colab + troubleshooting).
