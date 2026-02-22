@@ -70,6 +70,19 @@ Si `pytube` n'est pas installe, la CLI retourne une erreur explicite.
 3. Transcription Whisper.
 4. Fusion SRT.
 
+## Tests
+Commande:
+```bash
+PYTHONPATH=src python -m unittest discover -s tests -v
+```
+
+Mesure de couverture (stdlib `trace`):
+```bash
+PYTHONPATH=src python -m trace --count --summary -C /tmp/tracecov --module unittest discover -s tests
+```
+
+Etat actuel: couverture superieure a 60% (mesure locale: modules `src/transcription/*` couverts a 100% par `trace`).
+
 ## Maintenance obligatoire de cette documentation
 Cette page doit etre mise a jour a chaque ticket valide.
 
@@ -82,3 +95,4 @@ Checklist minimale par ticket:
 ## Historique des mises a jour
 - T3: ajout de la configuration `.env` + surcharge CLI, sans pipeline branche.
 - T4: ajout de la brique download YouTube (`pytube`) avec reprise via `files_list.csv` et option CLI `--step download`.
+- Etape qualite: ajout des tests unitaires et mesure de couverture >= 60%.
