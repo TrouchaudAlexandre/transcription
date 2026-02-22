@@ -118,6 +118,9 @@ PYTHONPATH=src python -m unittest discover -s tests -v
   - Installer `ffmpeg` / `ffprobe`
 - `Command not found: whisper`
   - Installer `openai-whisper`
+- `shell-init: error retrieving current directory` en Colab
+  - Cause: suppression de `/content/transcription` alors que la session est deja dans ce dossier.
+  - Fix: faire `os.chdir("/content")` avant de supprimer/recloner le projet (deja gere dans `colab/runner-colab.md`).
 
 ## Limites V1
 - Transcription sequentielle (pas de parallelisme).

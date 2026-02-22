@@ -3,17 +3,32 @@
 ## Cellule 1 - Setup et clone
 ```bash
 from google.colab import drive
+import os
+import shutil
+import subprocess
+
 drive.mount('/content/drive')
 
 REPO_URL = "https://github.com/<org-or-user>/<repo>.git"
 BRANCH = "main"
 PROJECT_DIR = "/content/transcription"
 
-!rm -rf "$PROJECT_DIR"
-!git clone --depth 1 --branch "$BRANCH" "$REPO_URL" "$PROJECT_DIR"
-!python -m pip install --upgrade pip
-!python -m pip install python-dotenv pytube openai-whisper
-!apt-get update -y && apt-get install -y ffmpeg
+# Evite les erreurs getcwd si la session etait deja dans PROJECT_DIR
+os.chdir("/content")
+if os.path.exists(PROJECT_DIR):
+    shutil.rmtree(PROJECT_DIR)
+
+subprocess.run(
+    ["git", "clone", "--depth", "1", "--branch", BRANCH, REPO_URL, PROJECT_DIR],
+    check=True,
+)
+subprocess.run(["python", "-m", "pip", "install", "--upgrade", "pip"], check=True)
+subprocess.run(
+    ["python", "-m", "pip", "install", "python-dotenv", "pytube", "openai-whisper"],
+    check=True,
+)
+subprocess.run(["apt-get", "update", "-y"], check=True)
+subprocess.run(["apt-get", "install", "-y", "ffmpeg"], check=True)
 ```
 
 ## Cellule 2 - Config et execution pipeline
