@@ -126,6 +126,17 @@ Comportement:
 - Produit un fichier final par audio:
   - `<OUTPUT_ROOT>/<playlist>/<audio_stem>_sous-titres_complets.srt`
 
+## Runner Colab (T8)
+Un runner minimal en 2 cellules est disponible ici:
+- `colab/runner-colab.md`
+
+Etapes:
+1. Cellule 1: monte Drive, clone le repo, installe dependances.
+2. Cellule 2: copie `.env.example` vers `.env`, puis execute `download -> segment -> transcribe -> merge`.
+
+Fichier de configuration type:
+- `.env.example`
+
 ## Tests
 Commande:
 ```bash
@@ -155,3 +166,4 @@ Checklist minimale par ticket:
 - T5: ajout de la brique segmentation audio (`ffmpeg`) avec option CLI `--step segment`.
 - T6: ajout de la brique transcription Whisper avec option CLI `--step transcribe`.
 - T7: ajout de la brique merge SRT avec option CLI `--step merge`.
+- T8: ajout du runner Colab minimal et du fichier `.env.example`.
