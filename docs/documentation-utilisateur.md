@@ -107,6 +107,8 @@ Comportement:
 - Transcrit les segments audio issus de la segmentation.
 - Si aucun segment n'est trouve, transcrit le fichier audio source.
 - Met a jour l'etat CSV en `transcribed=true` (audio et video associee si presente).
+- Journalise chaque segment individuellement (`start`, `done`, `skip`, `failed`).
+- En cas d'echec partiel, les segments deja transcrits sont detectes et skippes au relancement.
 
 ## Merge SRT (T7)
 Commande:

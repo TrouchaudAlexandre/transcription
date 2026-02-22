@@ -81,6 +81,10 @@ PYTHONPATH=src python -m transcription.cli.main --step segment
 PYTHONPATH=src python -m transcription.cli.main --step transcribe
 ```
 
+Logs:
+- progression par segment (`start`, `done`, `skip`, `failed`)
+- relance possible sans retraiter les segments deja transcrits
+
 ### 4) Merge
 ```bash
 PYTHONPATH=src python -m transcription.cli.main --step merge

@@ -28,7 +28,10 @@ class FakeEngine:
         self.calls.append((input_audio_path, output_directory))
         if self.fail:
             raise RuntimeError("boom")
-        Path(output_directory).mkdir(parents=True, exist_ok=True)
+        output_dir = Path(output_directory)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        stem = Path(input_audio_path).stem
+        (output_dir / f"{stem}.srt").write_text("ok", encoding="utf-8")
 
 
 class TranscribeUseCaseTests(unittest.TestCase):
@@ -115,7 +118,44 @@ class TranscribeUseCaseTests(unittest.TestCase):
             use_case.execute()
 
             self.assertFalse(repo.get(str(audio)).transcribed)
-            self.assertTrue(any("Transcription failed" in m for m in logger.errors))
+            self.assertTrue(any("Transcription segment failed" in m for m in logger.errors))
+            self.assertTrue(any("Transcription incomplete" in m for m in logger.errors))
+
+    def test_skip_already_transcribed_segment(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            audio = Path(tmp) / "audio" / "playlist" / "ep1.m4a"
+            seg_dir = Path(tmp) / "seg" / "playlist" / "ep1.m4a"
+            tr_dir = Path(tmp) / "tr" / "playlist" / "ep1.m4a"
+            seg1 = seg_dir / "ep1_part_1.m4a"
+            seg2 = seg_dir / "ep1_part_2.m4a"
+
+            audio.parent.mkdir(parents=True, exist_ok=True)
+            seg_dir.mkdir(parents=True, exist_ok=True)
+            tr_dir.mkdir(parents=True, exist_ok=True)
+            audio.write_text("a", encoding="utf-8")
+            seg1.write_text("s1", encoding="utf-8")
+            seg2.write_text("s2", encoding="utf-8")
+            (tr_dir / "ep1_part_1.srt").write_text("done", encoding="utf-8")
+
+            repo = CsvStateRepository(str(Path(tmp) / "files.csv"))
+            repo.upsert(FileState(str(audio), True, True, False))
+
+            logger = FakeLogger()
+            engine = FakeEngine()
+            use_case = TranscribeUseCase(
+                engine=engine,
+                state_repository=repo,
+                logger=logger,
+                segmentation_root=str(Path(tmp) / "seg"),
+                transcription_root=str(Path(tmp) / "tr"),
+            )
+
+            use_case.execute()
+
+            self.assertEqual(len(engine.calls), 1)
+            self.assertEqual(Path(engine.calls[0][0]).name, "ep1_part_2.m4a")
+            self.assertTrue(repo.get(str(audio)).transcribed)
+            self.assertTrue(any("Transcription skip" in m for m in logger.infos))
 
 
 if __name__ == "__main__":

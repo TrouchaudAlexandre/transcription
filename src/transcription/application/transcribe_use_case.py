@@ -9,6 +9,7 @@ from transcription.domain.interfaces.transcription_engine import TranscriptionEn
 
 class TranscribeUseCase:
     AUDIO_EXTENSIONS = {".mp3", ".wav", ".m4a", ".flac", ".aac"}
+    TRANSCRIPT_EXTENSIONS = {".srt", ".txt", ".vtt", ".json", ".tsv"}
 
     def __init__(
         self,
@@ -37,16 +38,37 @@ class TranscribeUseCase:
             output_dir = self._output_dir_for(audio_path)
 
             self._logger.info(f"Transcription start: {audio_path}")
-            try:
-                for input_file in inputs:
+            all_ok = True
+            total = len(inputs)
+            for idx, input_file in enumerate(inputs, start=1):
+                label = f"{input_file.name} ({idx}/{total})"
+                if self._has_transcript_for(input_file, output_dir):
+                    self._logger.info(f"Transcription skip (already done): {label}")
+                    continue
+
+                self._logger.info(f"Transcription segment start: {label}")
+                try:
                     self._engine.transcribe(str(input_file), str(output_dir))
-            except Exception as exc:  # pylint: disable=broad-except
-                self._logger.error(f"Transcription failed for {audio_path}: {exc}")
+                except Exception as exc:  # pylint: disable=broad-except
+                    self._logger.error(f"Transcription segment failed: {label}: {exc}")
+                    all_ok = False
+                    continue
+
+                if self._has_transcript_for(input_file, output_dir):
+                    self._logger.info(f"Transcription segment done: {label}")
+                else:
+                    self._logger.error(
+                        f"Transcription segment failed: {label}: missing output artifact"
+                    )
+                    all_ok = False
+
+            if not all_ok:
+                self._logger.error(
+                    f"Transcription incomplete for {audio_path}: fix failed segments and rerun."
+                )
                 continue
 
-            self._logger.info(
-                f"Transcription done: {audio_path} -> {len(inputs)} file(s)"
-            )
+            self._logger.info(f"Transcription done: {audio_path} -> {len(inputs)} file(s)")
             self._mark_transcribed(str(audio_path))
             self._mark_related_video_transcribed(audio_path)
 
@@ -66,6 +88,15 @@ class TranscribeUseCase:
 
     def _output_dir_for(self, audio_path: Path) -> Path:
         return self._transcription_root / audio_path.parent.name / audio_path.name
+
+    def _has_transcript_for(self, input_file: Path, output_dir: Path) -> bool:
+        if not output_dir.exists():
+            return False
+        stem = input_file.stem
+        for candidate in output_dir.glob(f"{stem}.*"):
+            if candidate.suffix.lower() in self.TRANSCRIPT_EXTENSIONS:
+                return True
+        return False
 
     def _mark_transcribed(self, path: str) -> None:
         current = self._state_repository.get(path)
