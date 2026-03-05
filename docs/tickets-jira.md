@@ -15,7 +15,7 @@
 - **DoD**: CLI fonctionnelle avec `--help` clair.
 
 ### T4 — Implémenter la brique download YouTube
-- **Description**: Télécharger audio + vidéo via `pytube` et gérer l’état dans un CSV.
+- **Description**: Télécharger audio + vidéo via `yt-dlp` et gérer l’état dans un CSV.
 - **DoD**: Téléchargement reproductible + reprise possible.
 
 ### T5 — Implémenter la segmentation audio

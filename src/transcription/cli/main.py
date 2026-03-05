@@ -67,7 +67,7 @@ def main() -> None:
     except RuntimeError as exc:
         print(f"Runtime error: {exc}", file=sys.stderr)
         print(
-            "Install missing dependencies in your environment, e.g. `pip install pytube python-dotenv`.",
+            "Install missing dependencies in your environment, e.g. `pip install yt-dlp python-dotenv`.",
             file=sys.stderr,
         )
         raise SystemExit(1) from exc

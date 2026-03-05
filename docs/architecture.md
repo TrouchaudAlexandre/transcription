@@ -17,7 +17,7 @@
 - Utilise les interfaces du domaine, reçoit des implémentations via injection.
 
 ### 3) Infrastructure (`infrastructure/`)
-- Implémentations concrètes : YouTube (pytube), Whisper, ffmpeg, filesystem, logs.
+- Implémentations concrètes : YouTube (yt-dlp), Whisper, ffmpeg, filesystem, logs.
 
 ### 4) Interface (`cli/`)
 - Point d’entrée CLI + chargement `.env` + paramètres.
@@ -36,7 +36,7 @@
 - La chaîne d’exécution est standardisée (download → segment → transcribe → merge) mais chaque étape peut être remplacée.
 
 ### Adapter
-- Encapsule des APIs externes (pytube, ffmpeg, whisper CLI).
+- Encapsule des APIs externes (yt-dlp, ffmpeg, whisper CLI).
 - Le domaine interagit avec des interfaces propres.
 
 ### Repository (léger)
@@ -69,7 +69,7 @@ src/
         logger.py
     infrastructure/
       sources/
-        youtube_pytube.py
+        youtube_ytdlp_source.py
       transcription/
         whisper_engine.py
       segmentation/
@@ -109,4 +109,3 @@ src/
 - **Sources** : ajouter un `OtherSourceAdapter`.
 - **Transcription engines** : ajouter `FasterWhisperEngine` ou API externe.
 - **Stockage** : ajouter un backend Drive API ou S3.
-

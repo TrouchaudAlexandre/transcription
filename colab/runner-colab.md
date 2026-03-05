@@ -24,7 +24,7 @@ subprocess.run(
 )
 subprocess.run(["python", "-m", "pip", "install", "--upgrade", "pip"], check=True)
 subprocess.run(
-    ["python", "-m", "pip", "install", "python-dotenv", "pytube", "openai-whisper"],
+    ["python", "-m", "pip", "install", "python-dotenv", "yt-dlp", "openai-whisper"],
     check=True,
 )
 subprocess.run(["apt-get", "update", "-y"], check=True)

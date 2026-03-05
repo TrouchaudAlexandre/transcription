@@ -3,7 +3,7 @@
 Pipeline Python pour transcrire des playlists YouTube avec Whisper, execute principalement sur Google Colab avec stockage sur Google Drive monte.
 
 ## Perimetre V1
-- Source: YouTube playlists (`pytube`).
+- Source: YouTube playlists (`yt-dlp`).
 - Segmentation: `ffmpeg` / `ffprobe`.
 - Transcription: `openai-whisper` (CLI `whisper`).
 - Merge SRT: fusion + recalage temporel + renumerotation.
@@ -21,13 +21,13 @@ Pipeline Python pour transcrire des playlists YouTube avec Whisper, execute prin
 - `ffmpeg` et `ffprobe` dans `PATH`
 - Dependance Python:
   - `python-dotenv`
-  - `pytube`
+  - `yt-dlp`
   - `openai-whisper`
 
 Installation rapide:
 ```bash
 python -m pip install --upgrade pip
-python -m pip install python-dotenv pytube openai-whisper
+python -m pip install python-dotenv yt-dlp openai-whisper
 ```
 
 ### Colab
@@ -116,8 +116,8 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 ```
 
 ## Depannage
-- `Runtime error: pytube is required...`
-  - Installer: `pip install pytube`
+- `Runtime error: yt-dlp is required...`
+  - Installer: `pip install yt-dlp`
 - `Subprocess failed ... ffmpeg`
   - Installer `ffmpeg` / `ffprobe`
 - `Command not found: whisper`

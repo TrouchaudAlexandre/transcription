@@ -6,7 +6,7 @@
 - Chemins Google Drive (logs, CSV, audio, vidéo, output).
 - Flags : `isMockActive`, `segment_length_sec`, modèles Whisper.
 
-2) **Téléchargement YouTube (pytube)**
+2) **Téléchargement YouTube (yt-dlp)**
 - Lecture d’un CSV `playlists.csv` : chaque ligne = `playlist_url, playlist_title?`.
 - Pour chaque playlist :
   - Récupère la liste des URLs vidéos.
@@ -40,7 +40,7 @@
 
 ## Comportement à conserver en V1
 - Chemins Drive par défaut identiques.
-- Téléchargement audio+vidéo via `pytube`.
+- Téléchargement audio+vidéo via `yt-dlp`.
 - CSV d’état `files_list.csv`.
 - Segmentation via `ffmpeg`.
 - Transcription via `openai-whisper` CLI.
@@ -48,7 +48,7 @@
 - Logs séparés (global + segmentation + transcription par segment).
 
 ## Points sensibles / à stabiliser
-- `pytube` peut être fragile.
+- `yt-dlp` peut être fragile.
 - Les flags CSV sont en `true/false` (string), parfois `TRUE` (incohérence).
 - Le lien audio/vidéo est basé sur remplacement d’extension.
 - Gestion d’erreur simple (log + CSV).

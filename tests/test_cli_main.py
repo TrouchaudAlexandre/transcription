@@ -58,7 +58,7 @@ class CliMainTests(unittest.TestCase):
     def test_main_handles_runtime_error(self) -> None:
         with mock.patch(
             "transcription.cli.main.run_download",
-            side_effect=RuntimeError("pytube is required for YouTube download"),
+            side_effect=RuntimeError("yt-dlp is required for YouTube download"),
         ):
             with mock.patch("sys.argv", ["prog", "--step", "download"]):
                 with self.assertRaises(SystemExit) as exc:

@@ -14,7 +14,13 @@ def _safe_name(value: str) -> str:
     return cleaned.strip("-") or "playlist"
 
 
-class YouTubePytubeSource(MediaSource):
+def _normalize_video_url(url: str) -> str:
+    if url.startswith("http"):
+        return url
+    return f"https://www.youtube.com/watch?v={url}"
+
+
+class YouTubeYtDlpSource(MediaSource):
     def __init__(
         self,
         playlist_csv: str,
@@ -29,9 +35,9 @@ class YouTubePytubeSource(MediaSource):
 
     def list_videos(self) -> Iterable[PlaylistVideo]:
         try:
-            from pytube import Playlist
+            import yt_dlp  # type: ignore
         except ImportError as exc:  # pragma: no cover
-            raise RuntimeError("pytube is required for YouTube download") from exc
+            raise RuntimeError("yt-dlp is required for YouTube download") from exc
 
         items: list[PlaylistVideo] = []
         if not self._playlist_csv.exists():
@@ -47,12 +53,29 @@ class YouTubePytubeSource(MediaSource):
                 if not playlist_url:
                     continue
 
-                playlist = Playlist(playlist_url)
-                title = row[1].strip() if len(row) > 1 and row[1].strip() else playlist.title
+                with yt_dlp.YoutubeDL(
+                    {
+                        "quiet": True,
+                        "extract_flat": True,
+                        "skip_download": True,
+                    }
+                ) as ydl:
+                    info = ydl.extract_info(playlist_url, download=False)
+
+                title = row[1].strip() if len(row) > 1 and row[1].strip() else info.get(
+                    "title", "playlist"
+                )
                 safe_title = _safe_name(title)
 
                 self._logger.info(f"Processing playlist: {safe_title}")
-                for index, video_url in enumerate(playlist.video_urls, start=1):
+                entries = info.get("entries") or []
+                for index, entry in enumerate(entries, start=1):
+                    if not entry:
+                        continue
+                    raw_url = entry.get("url") or entry.get("id", "")
+                    if not raw_url:
+                        continue
+                    video_url = _normalize_video_url(raw_url)
                     items.append(
                         PlaylistVideo(
                             playlist_title=safe_title,
@@ -64,11 +87,9 @@ class YouTubePytubeSource(MediaSource):
 
     def download_video(self, item: PlaylistVideo) -> DownloadResult:
         try:
-            from pytube import YouTube
+            import yt_dlp  # type: ignore
         except ImportError as exc:  # pragma: no cover
-            raise RuntimeError("pytube is required for YouTube download") from exc
-
-        yt = YouTube(item.video_url)
+            raise RuntimeError("yt-dlp is required for YouTube download") from exc
 
         resolved = self.resolve_paths(item)
         audio_path = Path(resolved.audio_path)
@@ -78,19 +99,32 @@ class YouTubePytubeSource(MediaSource):
         audio_dir.mkdir(parents=True, exist_ok=True)
         video_dir.mkdir(parents=True, exist_ok=True)
 
-        audio_filename = audio_path.name
-        video_filename = video_path.name
-
         if not audio_path.exists():
-            yt.streams.get_audio_only().download(
-                output_path=str(audio_dir),
-                filename=audio_filename,
-            )
+            with yt_dlp.YoutubeDL(
+                {
+                    "quiet": True,
+                    "outtmpl": str(audio_path),
+                    "format": "bestaudio[ext=m4a]/bestaudio",
+                    "postprocessors": [
+                        {
+                            "key": "FFmpegExtractAudio",
+                            "preferredcodec": "m4a",
+                        }
+                    ],
+                }
+            ) as ydl:
+                ydl.download([item.video_url])
+
         if not video_path.exists():
-            yt.streams.get_highest_resolution().download(
-                output_path=str(video_dir),
-                filename=video_filename,
-            )
+            with yt_dlp.YoutubeDL(
+                {
+                    "quiet": True,
+                    "outtmpl": str(video_path),
+                    "format": "bestvideo+bestaudio/best",
+                    "merge_output_format": "mp4",
+                }
+            ) as ydl:
+                ydl.download([item.video_url])
 
         return DownloadResult(audio_path=str(audio_path), video_path=str(video_path))
 

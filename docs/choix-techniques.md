@@ -9,7 +9,7 @@
 - Surcharge possible via **arguments CLI**.
 
 ## Source vidéo/audio
-- **YouTube via `pytube`** pour la V1.
+- **YouTube via `yt-dlp`** pour la V1.
 - Support principal : **playlists** (évolutif vers d’autres sources plus tard).
 
 ## Transcription

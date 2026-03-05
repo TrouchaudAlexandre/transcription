@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from transcription.domain.models.media import PlaylistVideo
-from transcription.infrastructure.sources.youtube_pytube_source import YouTubePytubeSource
+from transcription.infrastructure.sources.youtube_ytdlp_source import YouTubeYtDlpSource
 
 
 class FakeLogger:
@@ -21,52 +21,54 @@ class FakeLogger:
         self.errors.append(message)
 
 
-class FakeStream:
-    def download(self, output_path: str, filename: str) -> None:
-        Path(output_path).mkdir(parents=True, exist_ok=True)
-        Path(output_path, filename).write_text("x", encoding="utf-8")
+class FakeYoutubeDL:
+    def __init__(self, opts: dict) -> None:
+        self.opts = opts
 
+    def __enter__(self):
+        return self
 
-class FakeStreams:
-    def get_audio_only(self):
-        return FakeStream()
+    def __exit__(self, exc_type, exc, tb):
+        return False
 
-    def get_highest_resolution(self):
-        return FakeStream()
+    def extract_info(self, _url: str, download: bool = False):
+        return {
+            "title": "My Fancy Playlist",
+            "entries": [
+                {"url": "https://video/1"},
+                {"id": "video2id"},
+            ],
+        }
 
-
-class FakePlaylist:
-    def __init__(self, _url: str) -> None:
-        self.title = "My Fancy Playlist"
-        self.video_urls = ["https://video/1", "https://video/2"]
-
-
-class FakeYouTube:
-    def __init__(self, _url: str) -> None:
-        self.streams = FakeStreams()
+    def download(self, _urls):
+        outtmpl = self.opts.get("outtmpl")
+        if outtmpl:
+            path = Path(outtmpl)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("x", encoding="utf-8")
 
 
 class YouTubeSourceTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.old_pytube = sys.modules.get("pytube")
-        fake_module = types.SimpleNamespace(Playlist=FakePlaylist, YouTube=FakeYouTube)
-        sys.modules["pytube"] = fake_module
+        self.old_ytdlp = sys.modules.get("yt_dlp")
+        fake_module = types.SimpleNamespace(YoutubeDL=FakeYoutubeDL)
+        sys.modules["yt_dlp"] = fake_module
 
     def tearDown(self) -> None:
-        if self.old_pytube is None:
-            sys.modules.pop("pytube", None)
+        if self.old_ytdlp is None:
+            sys.modules.pop("yt_dlp", None)
         else:
-            sys.modules["pytube"] = self.old_pytube
+            sys.modules["yt_dlp"] = self.old_ytdlp
 
     def test_list_videos_and_resolve_paths(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             playlist_csv = Path(tmp) / "playlists.csv"
             with playlist_csv.open("w", newline="", encoding="utf-8") as handle:
                 writer = csv.writer(handle)
-                writer.writerow(["https://playlist/url", "Mon titre !"]) 
+                writer.writerow(["https://playlist/url", "Mon titre !"])
 
             logger = FakeLogger()
-            source = YouTubePytubeSource(
+            source = YouTubeYtDlpSource(
                 playlist_csv=str(playlist_csv),
                 audio_base_path=f"{tmp}/audio",
                 video_base_path=f"{tmp}/video",
@@ -87,7 +89,7 @@ class YouTubeSourceTests(unittest.TestCase):
             playlist_csv.write_text("", encoding="utf-8")
 
             logger = FakeLogger()
-            source = YouTubePytubeSource(
+            source = YouTubeYtDlpSource(
                 playlist_csv=str(playlist_csv),
                 audio_base_path=f"{tmp}/audio",
                 video_base_path=f"{tmp}/video",

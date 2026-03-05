@@ -15,11 +15,11 @@ Ce projet automatise la transcription de videos YouTube (playlist) avec Whisper,
 - Drive monte dans Colab.
 - Python 3.10+.
 - Outils systeme: `ffmpeg`.
-- Dependances Python (a finaliser dans les prochains tickets): `python-dotenv`, `pytube`, `openai-whisper`.
+- Dependances Python (a finaliser dans les prochains tickets): `python-dotenv`, `yt-dlp`, `openai-whisper`.
 
 Installation rapide:
 ```bash
-pip install python-dotenv pytube
+pip install python-dotenv yt-dlp
 ```
 
 ## Configuration
@@ -62,7 +62,7 @@ PYTHONPATH=/home/20104112/Documents/Perso/project/transcription/src \
 ```
 
 Important: au stade actuel (T7), les etapes `download`, `segment`, `transcribe` et `merge` sont implementees.
-Si `pytube` n'est pas installe, la CLI retourne une erreur explicite sur `download`.
+Si `yt-dlp` n'est pas installe, la CLI retourne une erreur explicite sur `download`.
 
 ## Workflow cible (une fois toutes les briques V1 terminees)
 1. Download des medias de playlist.
@@ -167,7 +167,7 @@ Checklist minimale par ticket:
 
 ## Historique des mises a jour
 - T3: ajout de la configuration `.env` + surcharge CLI, sans pipeline branche.
-- T4: ajout de la brique download YouTube (`pytube`) avec reprise via `files_list.csv` et option CLI `--step download`.
+- T4: ajout de la brique download YouTube (`yt-dlp`) avec reprise via `files_list.csv` et option CLI `--step download`.
 - Etape qualite: ajout des tests unitaires et mesure de couverture >= 60%.
 - T5: ajout de la brique segmentation audio (`ffmpeg`) avec option CLI `--step segment`.
 - T6: ajout de la brique transcription Whisper avec option CLI `--step transcribe`.

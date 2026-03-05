@@ -14,7 +14,7 @@ Construire une brique **exclusivement dédiée à la transcription** (pas de tra
 - La configuration se fait via un **fichier `.env`** (valeurs par défaut), surchargeable par **arguments CLI**.
 
 ## Exigences fonctionnelles
-- Télécharger les contenus YouTube (audio + vidéo) via `pytube`.
+- Télécharger les contenus YouTube (audio + vidéo) via `yt-dlp`.
 - Enregistrer l’état des fichiers (téléchargé/segmenté/transcrit) pour permettre la reprise.
 - Segmenter l’audio via `ffmpeg`.
 - Transcrire via **OpenAI Whisper (openai-whisper)**.

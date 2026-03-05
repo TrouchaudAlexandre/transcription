@@ -14,7 +14,7 @@
 
 ### Infrastructure (`infrastructure`)
 - Adaptateurs concrets :
-  - YouTube via `pytube`.
+  - YouTube via `yt-dlp`.
   - Segmentation via `ffmpeg`.
   - Transcription via `openai-whisper` CLI.
   - Stockage local/montage Drive.
@@ -29,7 +29,7 @@
 
 - **Strategy** : changer de source ou moteur de transcription sans modifier le pipeline.
 - **Factory** : création centralisée des implémentations en fonction de la config.
-- **Adapter** : encapsuler `pytube`, `ffmpeg`, `whisper`.
+- **Adapter** : encapsuler `yt-dlp`, `ffmpeg`, `whisper`.
 - **Pipeline / Template Method** : enchaînement standardisé des étapes.
 - **Repository (léger)** : abstraction du CSV d’état.
 
