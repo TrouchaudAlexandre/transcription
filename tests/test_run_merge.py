@@ -35,8 +35,8 @@ class RunMergeTests(unittest.TestCase):
             with mock.patch("transcription.application.run_merge.MergeUseCase") as use_case_cls:
                 run_merge(settings)
 
-        use_case_cls.assert_called_once()
-        use_case_cls.return_value.execute.assert_called_once()
+        self.assertEqual(use_case_cls.call_count, 2)
+        self.assertEqual(use_case_cls.return_value.execute.call_count, 2)
 
 
 if __name__ == "__main__":

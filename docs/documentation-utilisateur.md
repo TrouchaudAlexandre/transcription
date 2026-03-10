@@ -140,8 +140,10 @@ Comportement:
 - Trie les `.srt` par `part_n`.
 - Recale les timestamps avec l'offset de segment (`segment_length_seconds`).
 - Renumerote les entrees.
-- Produit un fichier final par audio:
+- Produit un fichier final source par audio:
   - `<OUTPUT_ROOT>/<playlist>/<audio_stem>_sous-titres_complets.srt`
+- Si les segments traduits existent et que `translated=true`, produit aussi un fichier final traduit:
+  - `<OUTPUT_ROOT>/<playlist>/<audio_stem>_<target_language>_sous-titres_complets.srt`
 
 ## Runner Colab (T8)
 Un runner minimal en 2 cellules est disponible ici:
@@ -193,3 +195,4 @@ Checklist minimale par ticket:
 - P2-T4: ajout de l'interface de traduction et du moteur OpenAI/GPT, non encore branche a une etape CLI.
 - P2-T5: ajout de la brique `translate` avec reprise par segment, provider configurable, `SOURCE_VARIANT` et `TRANSLATION_CONTEXT`.
 - P2-T6: ajout d'une validation deterministe du format SRT traduit avant acceptation d'un segment.
+- P2-T7: le merge produit maintenant le SRT final source et le SRT final traduit.

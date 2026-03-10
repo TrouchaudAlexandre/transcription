@@ -42,7 +42,7 @@ class MergeUseCaseTests(unittest.TestCase):
             use_case = MergeUseCase(
                 state_repository=repo,
                 logger=logger,
-                transcription_root=str(Path(tmp) / "transcription"),
+                input_root=str(Path(tmp) / "transcription"),
                 output_root=str(Path(tmp) / "output"),
                 segment_length_seconds=60,
             )
@@ -68,7 +68,7 @@ class MergeUseCaseTests(unittest.TestCase):
             use_case = MergeUseCase(
                 state_repository=repo,
                 logger=logger,
-                transcription_root=str(Path(tmp) / "transcription"),
+                input_root=str(Path(tmp) / "transcription"),
                 output_root=str(Path(tmp) / "output"),
                 segment_length_seconds=60,
             )
@@ -76,6 +76,39 @@ class MergeUseCaseTests(unittest.TestCase):
             use_case.execute()
 
             self.assertTrue(any("Merge skipped" in msg for msg in logger.infos))
+
+    def test_merge_translated_outputs_target_language_suffix(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            audio = Path(tmp) / "audio" / "playlist" / "ep1.m4a"
+            audio.parent.mkdir(parents=True, exist_ok=True)
+            audio.write_text("a", encoding="utf-8")
+
+            repo = CsvStateRepository(str(Path(tmp) / "files.csv"))
+            repo.upsert(FileState(str(audio), True, True, True, True))
+
+            root = Path(tmp) / "translation" / "playlist" / "ep1.m4a"
+            root.mkdir(parents=True, exist_ok=True)
+            (root / "ep1_part_1.srt").write_text(
+                "1\n00:00:00,000 --> 00:00:02,000\nBonjour\n\n", encoding="utf-8"
+            )
+
+            logger = FakeLogger()
+            use_case = MergeUseCase(
+                state_repository=repo,
+                logger=logger,
+                input_root=str(Path(tmp) / "translation"),
+                output_root=str(Path(tmp) / "output"),
+                segment_length_seconds=60,
+                require_translated=True,
+                output_suffix="_french",
+                merge_label="translated",
+            )
+
+            use_case.execute()
+
+            out = Path(tmp) / "output" / "playlist" / "ep1_french_sous-titres_complets.srt"
+            self.assertTrue(out.exists())
+            self.assertIn("Bonjour", out.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

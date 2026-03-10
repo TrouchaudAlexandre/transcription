@@ -18,15 +18,21 @@ class MergeUseCase:
         self,
         state_repository: StateRepository,
         logger: Logger,
-        transcription_root: str,
+        input_root: str,
         output_root: str,
         segment_length_seconds: int,
+        require_translated: bool = False,
+        output_suffix: str = "",
+        merge_label: str = "source",
     ) -> None:
         self._state_repository = state_repository
         self._logger = logger
-        self._transcription_root = Path(transcription_root)
+        self._input_root = Path(input_root)
         self._output_root = Path(output_root)
         self._segment_length_seconds = segment_length_seconds
+        self._require_translated = require_translated
+        self._output_suffix = output_suffix
+        self._merge_label = merge_label
 
     def execute(self) -> None:
         self._output_root.mkdir(parents=True, exist_ok=True)
@@ -38,20 +44,21 @@ class MergeUseCase:
 
             srt_files = self._find_srt_files(audio_path)
             if not srt_files:
-                self._logger.info(f"Merge skipped (no srt): {audio_path}")
+                self._logger.info(f"Merge skipped ({self._merge_label}, no srt): {audio_path}")
                 continue
 
             merged_content = self._merge_files(srt_files)
             output_path = self._output_path_for(audio_path)
             output_path.parent.mkdir(parents=True, exist_ok=True)
             output_path.write_text(merged_content.strip() + "\n", encoding="utf-8")
-            self._logger.info(f"Merge done: {output_path}")
+            self._logger.info(f"Merge done ({self._merge_label}): {output_path}")
 
     def _is_eligible_audio(self, state: FileState, audio_path: Path) -> bool:
-        return state.transcribed and audio_path.suffix.lower() in self.AUDIO_EXTENSIONS
+        is_ready = state.translated if self._require_translated else state.transcribed
+        return is_ready and audio_path.suffix.lower() in self.AUDIO_EXTENSIONS
 
     def _find_srt_files(self, audio_path: Path) -> list[Path]:
-        root = self._transcription_root / audio_path.parent.name / audio_path.name
+        root = self._input_root / audio_path.parent.name / audio_path.name
         if not root.exists():
             return []
 
@@ -60,7 +67,9 @@ class MergeUseCase:
 
     def _output_path_for(self, audio_path: Path) -> Path:
         playlist_name = audio_path.parent.name
-        output_name = f"{audio_path.stem}_sous-titres_complets.srt"
+        output_name = (
+            f"{audio_path.stem}{self._output_suffix}_sous-titres_complets.srt"
+        )
         return self._output_root / playlist_name / output_name
 
     def _merge_files(self, srt_files: list[Path]) -> str:
