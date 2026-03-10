@@ -54,6 +54,7 @@ class MergeUseCaseTests(unittest.TestCase):
             content = out.read_text(encoding="utf-8")
             self.assertIn("1\n00:00:00,000 --> 00:00:02,000\nHello", content)
             self.assertIn("2\n00:01:00,500 --> 00:01:01,000\nWorld", content)
+            self.assertTrue(repo.get(str(audio)).merged_source)
 
     def test_merge_skips_when_no_srt_files(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -76,6 +77,33 @@ class MergeUseCaseTests(unittest.TestCase):
             use_case.execute()
 
             self.assertTrue(any("Merge skipped" in msg for msg in logger.infos))
+
+    def test_merge_skips_when_already_done_and_output_exists(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            audio = Path(tmp) / "audio" / "playlist" / "ep1.m4a"
+            audio.parent.mkdir(parents=True, exist_ok=True)
+            audio.write_text("a", encoding="utf-8")
+
+            repo = CsvStateRepository(str(Path(tmp) / "files.csv"))
+            repo.upsert(FileState(str(audio), True, True, True, False, True, False))
+
+            output = Path(tmp) / "output" / "playlist" / "ep1_sous-titres_complets.srt"
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_text("merged", encoding="utf-8")
+
+            logger = FakeLogger()
+            use_case = MergeUseCase(
+                state_repository=repo,
+                logger=logger,
+                input_root=str(Path(tmp) / "transcription"),
+                output_root=str(Path(tmp) / "output"),
+                segment_length_seconds=60,
+            )
+
+            use_case.execute()
+
+            self.assertEqual(output.read_text(encoding="utf-8"), "merged")
+            self.assertTrue(any("already done" in msg for msg in logger.infos))
 
     def test_merge_translated_outputs_target_language_suffix(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -109,6 +137,7 @@ class MergeUseCaseTests(unittest.TestCase):
             out = Path(tmp) / "output" / "playlist" / "ep1_french_sous-titres_complets.srt"
             self.assertTrue(out.exists())
             self.assertIn("Bonjour", out.read_text(encoding="utf-8"))
+            self.assertTrue(repo.get(str(audio)).merged_translated)
 
 
 if __name__ == "__main__":

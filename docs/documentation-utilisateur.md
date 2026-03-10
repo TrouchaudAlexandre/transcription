@@ -80,7 +80,7 @@ PYTHONPATH=/home/20104112/Documents/Perso/project/transcription/src \
 Important: au stade actuel, les etapes `download`, `segment`, `transcribe`, `translate` et `merge` sont implementees.
 Si `yt-dlp` n'est pas installe, la CLI retourne une erreur explicite sur `download`.
 `WHISPER_LANGUAGE` reste la langue source de reference pour la future traduction.
-Le CSV d'etat suit maintenant `downloaded`, `segmented`, `transcribed`, `translated` et reste compatible avec les anciens fichiers.
+Le CSV d'etat suit maintenant `downloaded`, `segmented`, `transcribed`, `translated`, `merged_source`, `merged_translated` et reste compatible avec les anciens fichiers.
 Le moteur de traduction est interchangeable par provider via une factory. Les providers disponibles sont `openai` et `gemini`.
 La traduction peut etre contextualisee avec `SOURCE_VARIANT` (ex: `tunisian_arabic`) et `TRANSLATION_CONTEXT`.
 La traduction valide maintenant la structure SRT avant d'accepter un segment traduit.
@@ -185,6 +185,7 @@ Comportement:
   - `<OUTPUT_ROOT>/<playlist>/<audio_stem>_sous-titres_complets.srt`
 - Si les segments traduits existent et que `translated=true`, produit aussi un fichier final traduit:
   - `<OUTPUT_ROOT>/<playlist>/<audio_stem>_<target_language>_sous-titres_complets.srt`
+- Skippe un merge deja effectue si le flag CSV correspondant est a `true` et que le fichier final existe encore.
 
 ## Runner Colab (T8)
 Un runner minimal en 2 cellules est disponible ici:

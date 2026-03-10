@@ -42,15 +42,20 @@ class MergeUseCase:
             if not self._is_eligible_audio(state, audio_path):
                 continue
 
+            output_path = self._output_path_for(audio_path)
+            if self._is_already_merged(state, output_path):
+                self._logger.info(f"Merge skipped ({self._merge_label}, already done): {output_path}")
+                continue
+
             srt_files = self._find_srt_files(audio_path)
             if not srt_files:
                 self._logger.info(f"Merge skipped ({self._merge_label}, no srt): {audio_path}")
                 continue
 
             merged_content = self._merge_files(srt_files)
-            output_path = self._output_path_for(audio_path)
             output_path.parent.mkdir(parents=True, exist_ok=True)
             output_path.write_text(merged_content.strip() + "\n", encoding="utf-8")
+            self._state_repository.upsert(self._mark_merged(state))
             self._logger.info(f"Merge done ({self._merge_label}): {output_path}")
 
     def _is_eligible_audio(self, state: FileState, audio_path: Path) -> bool:
@@ -64,6 +69,31 @@ class MergeUseCase:
 
         files = [p for p in root.iterdir() if p.is_file() and p.suffix.lower() == ".srt"]
         return sorted(files, key=self._srt_sort_key)
+
+    def _is_already_merged(self, state: FileState, output_path: Path) -> bool:
+        merge_flag = state.merged_translated if self._require_translated else state.merged_source
+        return merge_flag and output_path.exists()
+
+    def _mark_merged(self, state: FileState) -> FileState:
+        if self._require_translated:
+            return FileState(
+                path=state.path,
+                downloaded=state.downloaded,
+                segmented=state.segmented,
+                transcribed=state.transcribed,
+                translated=state.translated,
+                merged_source=state.merged_source,
+                merged_translated=True,
+            )
+        return FileState(
+            path=state.path,
+            downloaded=state.downloaded,
+            segmented=state.segmented,
+            transcribed=state.transcribed,
+            translated=state.translated,
+            merged_source=True,
+            merged_translated=state.merged_translated,
+        )
 
     def _output_path_for(self, audio_path: Path) -> Path:
         playlist_name = audio_path.parent.name

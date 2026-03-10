@@ -12,6 +12,8 @@ class FileState:
     segmented: bool
     transcribed: bool
     translated: bool = False
+    merged_source: bool = False
+    merged_translated: bool = False
 
 
 class StateRepository(ABC):

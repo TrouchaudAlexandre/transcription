@@ -8,7 +8,7 @@ Pipeline Python pour transcrire et traduire des playlists YouTube, execute princ
 - Transcription: `openai-whisper` (CLI `whisper`).
 - Traduction: provider configurable, implementations `openai` et `gemini` disponibles.
 - Merge SRT: fusion + recalage temporel + renumerotation.
-- Etat: CSV `path,downloaded,segmented,transcribed,translated`.
+- Etat: CSV `path,downloaded,segmented,transcribed,translated,merged_source,merged_translated`.
 
 ## Arborescence utile
 - Code: `src/transcription/`
@@ -140,6 +140,7 @@ PYTHONPATH=src python -m transcription.cli.main --step merge
 - `transcribe` traite seulement `segmented=true` et `transcribed=false`.
 - `translate` traite seulement `transcribed=true` et `translated=false`.
 - `merge` produit le SRT source et, si disponible, le SRT traduit.
+- `merge` skippe un artefact deja genere si son flag CSV est a `true` et que le fichier final existe encore.
 
 ## Tests
 Lancer tous les tests:
