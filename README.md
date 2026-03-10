@@ -107,10 +107,11 @@ Notes:
 - utilise `WHISPER_LANGUAGE` comme langue source generale
 - utilise `SOURCE_VARIANT` pour preciser un dialecte, par exemple `tunisian_arabic`
 - utilise `TRANSLATION_CONTEXT` pour injecter du contexte metier/culturel libre
-- par defaut, la traduction utilise `gpt-5-mini`
+- par defaut, la traduction utilise `gemini-2.5-flash-lite`
 - les appels retry uniquement sur erreurs transitoires (`429`, `408`, `409`, `5xx`, timeout/connexion)
 - `TRANSLATION_PROVIDER` accepte `openai` et `gemini`
-- pour un mode quota gratuit / cout minimal, utiliser `TRANSLATION_PROVIDER=gemini` et `TRANSLATION_MODEL=gemini-2.5-flash-lite`
+- le preset par defaut vise le free tier Gemini
+- pour un mode qualite OpenAI, utiliser `TRANSLATION_PROVIDER=openai` et `TRANSLATION_MODEL=gpt-5-mini`
 
 ### 5) Merge
 ```bash

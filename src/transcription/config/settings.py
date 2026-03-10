@@ -86,10 +86,10 @@ def load_settings() -> Settings:
         language=env("WHISPER_LANGUAGE", "Arabic"),
         source_variant=env("SOURCE_VARIANT", ""),
         target_language=env("TARGET_LANGUAGE", "French"),
-        translation_provider=env("TRANSLATION_PROVIDER", "openai"),
-        translation_model=env("TRANSLATION_MODEL", "gpt-5-mini"),
+        translation_provider=env("TRANSLATION_PROVIDER", "gemini"),
+        translation_model=env("TRANSLATION_MODEL", "gemini-2.5-flash-lite"),
         translation_api_key=env("TRANSLATION_API_KEY", ""),
-        translation_max_retries=int(env("TRANSLATION_MAX_RETRIES", "0")),
+        translation_max_retries=int(env("TRANSLATION_MAX_RETRIES", "3")),
         translation_retry_base_delay_seconds=float(
             env("TRANSLATION_RETRY_BASE_DELAY_SECONDS", "2.0")
         ),

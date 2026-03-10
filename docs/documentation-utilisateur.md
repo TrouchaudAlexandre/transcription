@@ -143,8 +143,8 @@ PYTHONPATH=src python -m transcription.cli.main \
   --language "Arabic" \
   --source-variant "tunisian_arabic" \
   --target-language "French" \
-  --translation-provider "openai" \
-  --translation-model "gpt-5-mini"
+  --translation-provider "gemini" \
+  --translation-model "gemini-2.5-flash-lite"
 ```
 
 Prerequis:
@@ -158,9 +158,10 @@ Comportement:
 - Journalise chaque segment (`start`, `done`, `skip`, `failed`).
 - Skippe les segments deja traduits.
 - Utilise `SOURCE_VARIANT` et `TRANSLATION_CONTEXT` pour enrichir le prompt.
-- Utilise `gpt-5-mini` par defaut.
+- Utilise `gemini-2.5-flash-lite` par defaut.
 - `TRANSLATION_PROVIDER` accepte `openai` et `gemini`.
-- Pour viser le free tier Gemini, utiliser `TRANSLATION_PROVIDER=gemini` et `TRANSLATION_MODEL=gemini-2.5-flash-lite`.
+- Le preset par defaut vise le free tier Gemini.
+- Pour viser la qualite OpenAI, utiliser `TRANSLATION_PROVIDER=openai` et `TRANSLATION_MODEL=gpt-5-mini`.
 - Retry automatiquement seulement sur erreurs transitoires (`429`, `408`, `409`, `5xx`, timeout/connexion).
 - Valide structurellement le SRT traduit avant de l'accepter.
 - Met a jour l'etat CSV en `translated=true` seulement si tous les segments passent.

@@ -57,7 +57,7 @@ os.chdir(PROJECT_DIR)
 # - TARGET_LANGUAGE
 # - SOURCE_VARIANT
 # - TRANSLATION_CONTEXT
-# - TRANSLATION_MODEL=gpt-5-mini
+# - TRANSLATION_MODEL=gemini-2.5-flash-lite
 # - TRANSLATION_PROVIDER=openai|gemini
 
 # 3) Lancer les etapes du pipeline
@@ -73,5 +73,6 @@ os.chdir(PROJECT_DIR)
 - Modifier `.env` apres copie si tes chemins Drive ou tes parametres de traduction different.
 - Pour la traduction, renseigner `TRANSLATION_API_KEY` dans `.env`.
 - Si `TRANSLATION_PROVIDER=gemini`, `google-genai` est deja installe par ce runner.
+- Le preset par defaut du projet vise `gemini-2.5-flash-lite`.
 - Pour un dialecte comme le tunisien, utiliser `SOURCE_VARIANT=tunisian_arabic` et completer `TRANSLATION_CONTEXT` si necessaire.
 - Tu peux relancer une etape seule (`--step segment` par ex.) grace au CSV d'etat.
