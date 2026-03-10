@@ -1,13 +1,14 @@
-# Transcription Pipeline V1
+# Transcription Pipeline
 
-Pipeline Python pour transcrire des playlists YouTube avec Whisper, execute principalement sur Google Colab avec stockage sur Google Drive monte.
+Pipeline Python pour transcrire et traduire des playlists YouTube, execute principalement sur Google Colab avec stockage sur Google Drive monte.
 
-## Perimetre V1
+## Perimetre actuel
 - Source: YouTube playlists (`yt-dlp`).
 - Segmentation: `ffmpeg` / `ffprobe`.
 - Transcription: `openai-whisper` (CLI `whisper`).
+- Traduction: provider configurable, implementation `openai` disponible.
 - Merge SRT: fusion + recalage temporel + renumerotation.
-- Etat: CSV `path,downloaded,segmented,transcribed`.
+- Etat: CSV `path,downloaded,segmented,transcribed,translated`.
 
 ## Arborescence utile
 - Code: `src/transcription/`
@@ -23,11 +24,12 @@ Pipeline Python pour transcrire des playlists YouTube avec Whisper, execute prin
   - `python-dotenv`
   - `yt-dlp`
   - `openai-whisper`
+  - `openai`
 
 Installation rapide:
 ```bash
 python -m pip install --upgrade pip
-python -m pip install python-dotenv yt-dlp openai-whisper
+python -m pip install python-dotenv yt-dlp openai-whisper openai
 ```
 
 ### Colab
@@ -48,10 +50,18 @@ Variables principales:
 - `VIDEO_BASE_PATH`
 - `SEGMENTATION_ROOT`
 - `TRANSCRIPTION_ROOT`
+- `TRANSLATION_ROOT`
 - `OUTPUT_ROOT`
 - `SEGMENT_LENGTH_SECONDS`
 - `WHISPER_MODEL`
 - `WHISPER_LANGUAGE`
+- `SOURCE_VARIANT`
+- `TARGET_LANGUAGE`
+- `TRANSLATION_PROVIDER`
+- `TRANSLATION_MODEL`
+- `TRANSLATION_API_KEY`
+- `TRANSLATION_CONTEXT`
+- `TRANSLATION_PROMPT_VERSION`
 
 ## Format attendu de `PLAYLIST_CSV`
 Chaque ligne:
@@ -85,7 +95,17 @@ Logs:
 - progression par segment (`start`, `done`, `skip`, `failed`)
 - relance possible sans retraiter les segments deja transcrits
 
-### 4) Merge
+### 4) Translate
+```bash
+PYTHONPATH=src python -m transcription.cli.main --step translate
+```
+
+Notes:
+- utilise `WHISPER_LANGUAGE` comme langue source generale
+- utilise `SOURCE_VARIANT` pour preciser un dialecte, par exemple `tunisian_arabic`
+- utilise `TRANSLATION_CONTEXT` pour injecter du contexte metier/culturel libre
+
+### 5) Merge
 ```bash
 PYTHONPATH=src python -m transcription.cli.main --step merge
 ```
@@ -98,8 +118,11 @@ PYTHONPATH=src python -m transcription.cli.main --step merge
   - `<SEGMENTATION_ROOT>/<playlist>/<audio_filename>/<audio_stem>_part_N.ext`
 - Transcriptions brutes (whisper):
   - `<TRANSCRIPTION_ROOT>/<playlist>/<audio_filename>/`
-- SRT fusionne:
+- Traductions segmentaires:
+  - `<TRANSLATION_ROOT>/<playlist>/<audio_filename>/`
+- SRT fusionnes:
   - `<OUTPUT_ROOT>/<playlist>/<audio_stem>_sous-titres_complets.srt`
+  - `<OUTPUT_ROOT>/<playlist>/<audio_stem>_<target_language>_sous-titres_complets.srt`
 - Etat:
   - `FILES_LIST_CSV`
 
@@ -107,7 +130,8 @@ PYTHONPATH=src python -m transcription.cli.main --step merge
 - `download` skippe les fichiers deja telecharges (etat + presence disque).
 - `segment` traite seulement `downloaded=true` et `segmented=false`.
 - `transcribe` traite seulement `segmented=true` et `transcribed=false`.
-- `merge` lit les SRT disponibles; pas d'etat supplementaire en V1.
+- `translate` traite seulement `transcribed=true` et `translated=false`.
+- `merge` produit le SRT source et, si disponible, le SRT traduit.
 
 ## Tests
 Lancer tous les tests:
@@ -122,11 +146,13 @@ PYTHONPATH=src python -m unittest discover -s tests -v
   - Installer `ffmpeg` / `ffprobe`
 - `Command not found: whisper`
   - Installer `openai-whisper`
+- `Runtime error: openai package is required for GPT translation`
+  - Installer `openai`
 - `shell-init: error retrieving current directory` en Colab
   - Cause: suppression de `/content/transcription` alors que la session est deja dans ce dossier.
   - Fix: faire `os.chdir("/content")` avant de supprimer/recloner le projet (deja gere dans `colab/runner-colab.md`).
 
-## Limites V1
-- Transcription sequentielle (pas de parallelisme).
-- Pas de brique traduction.
+## Limites actuelles
+- Transcription et traduction sequentielles.
+- Providers de traduction vises a terme, mais seule l'implementation `openai` est disponible.
 - Pas de stockage Drive API (montage Drive uniquement).

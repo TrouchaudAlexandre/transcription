@@ -151,7 +151,7 @@ Un runner minimal en 2 cellules est disponible ici:
 
 Etapes:
 1. Cellule 1: monte Drive, clone le repo, installe dependances.
-2. Cellule 2: copie `.env.example` vers `.env`, puis execute `download -> segment -> transcribe -> merge`.
+2. Cellule 2: copie `.env.example` vers `.env`, renseigne les parametres de traduction, puis execute `download -> segment -> transcribe -> translate -> merge`.
 
 Fichier de configuration type:
 - `.env.example`

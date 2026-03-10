@@ -24,7 +24,16 @@ subprocess.run(
 )
 subprocess.run(["python", "-m", "pip", "install", "--upgrade", "pip"], check=True)
 subprocess.run(
-    ["python", "-m", "pip", "install", "python-dotenv", "yt-dlp", "openai-whisper"],
+    [
+        "python",
+        "-m",
+        "pip",
+        "install",
+        "python-dotenv",
+        "yt-dlp",
+        "openai-whisper",
+        "openai",
+    ],
     check=True,
 )
 subprocess.run(["apt-get", "update", "-y"], check=True)
@@ -38,17 +47,27 @@ import os
 PROJECT_DIR = "/content/transcription"
 os.chdir(PROJECT_DIR)
 
-# 1) Copier l'exemple de config puis adapter les chemins si besoin
+# 1) Copier l'exemple de config
 !cp -f .env.example .env
 
-# 2) Lancer les etapes V1
+# 2) Adapter les parametres necessaires a la traduction
+# Exemple:
+# - TRANSLATION_API_KEY
+# - TARGET_LANGUAGE
+# - SOURCE_VARIANT
+# - TRANSLATION_CONTEXT
+
+# 3) Lancer les etapes du pipeline
 !PYTHONPATH=src python -m transcription.cli.main --step download
 !PYTHONPATH=src python -m transcription.cli.main --step segment
 !PYTHONPATH=src python -m transcription.cli.main --step transcribe
+!PYTHONPATH=src python -m transcription.cli.main --step translate
 !PYTHONPATH=src python -m transcription.cli.main --step merge
 ```
 
 ## Notes
 - Modifier `REPO_URL` avant execution.
-- Modifier `.env` apres copie si tes chemins Drive differents.
+- Modifier `.env` apres copie si tes chemins Drive ou tes parametres de traduction different.
+- Pour la traduction GPT, renseigner `TRANSLATION_API_KEY` dans `.env`.
+- Pour un dialecte comme le tunisien, utiliser `SOURCE_VARIANT=tunisian_arabic` et completer `TRANSLATION_CONTEXT` si necessaire.
 - Tu peux relancer une etape seule (`--step segment` par ex.) grace au CSV d'etat.
