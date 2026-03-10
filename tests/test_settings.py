@@ -20,6 +20,8 @@ class SettingsTests(unittest.TestCase):
                 "TARGET_LANGUAGE": "English",
                 "TRANSLATION_PROVIDER": "mistral",
                 "TRANSLATION_MODEL": "gpt-test",
+                "TRANSLATION_MAX_RETRIES": "3",
+                "TRANSLATION_RETRY_BASE_DELAY_SECONDS": "2.0",
                 "TRANSLATION_CONTEXT": "dialect content",
             },
             clear=False,

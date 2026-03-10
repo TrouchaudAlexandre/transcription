@@ -7,7 +7,7 @@ from transcription.infrastructure.translation.retry_policy import (
 )
 
 
-class OpenAITranslationEngine(TranslationEngine):
+class GeminiTranslationEngine(TranslationEngine):
     def __init__(
         self,
         model: str,
@@ -30,54 +30,42 @@ class OpenAITranslationEngine(TranslationEngine):
         target_language: str,
         translation_context: str,
     ) -> str:
-        client = self._create_client()
-        response = self._create_response(
-            client=client,
-            source_srt=source_srt,
-            source_language=source_language,
-            source_variant=source_variant,
-            target_language=target_language,
-            translation_context=translation_context,
-        )
-        output_text = getattr(response, "output_text", "").strip()
-        if not output_text:
-            raise RuntimeError("OpenAI translation returned an empty response")
-        return self._sanitize_output(output_text)
-
-    def _create_response(
-        self,
-        client,
-        source_srt: str,
-        source_language: str,
-        source_variant: str,
-        target_language: str,
-        translation_context: str,
-    ):
-        return execute_with_retry(
-            operation=lambda: client.responses.create(
-                    model=self._model,
-                    instructions=self._instructions(
+        client, types = self._create_client()
+        response = execute_with_retry(
+            operation=lambda: client.models.generate_content(
+                model=self._model,
+                contents=source_srt,
+                config=types.GenerateContentConfig(
+                    system_instruction=self._instructions(
                         source_language,
                         source_variant,
                         target_language,
                         translation_context,
                     ),
-                    input=source_srt,
+                    temperature=0.1,
                 ),
+            ),
             max_retries=self._max_retries,
             base_delay_seconds=self._retry_base_delay_seconds,
             is_retryable=is_retryable_http_error,
         )
+        output_text = getattr(response, "text", "").strip()
+        if not output_text:
+            raise RuntimeError("Gemini translation returned an empty response")
+        return self._sanitize_output(output_text)
 
     def _create_client(self):
         try:
-            from openai import OpenAI
+            from google import genai
+            from google.genai import types
         except ImportError as exc:  # pragma: no cover
-            raise RuntimeError("openai package is required for GPT translation") from exc
+            raise RuntimeError(
+                "google-genai package is required for Gemini translation"
+            ) from exc
 
         if self._api_key:
-            return OpenAI(api_key=self._api_key)
-        return OpenAI()
+            return genai.Client(api_key=self._api_key), types
+        return genai.Client(), types
 
     def _instructions(
         self,

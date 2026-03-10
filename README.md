@@ -6,7 +6,7 @@ Pipeline Python pour transcrire et traduire des playlists YouTube, execute princ
 - Source: YouTube playlists (`yt-dlp`).
 - Segmentation: `ffmpeg` / `ffprobe`.
 - Transcription: `openai-whisper` (CLI `whisper`).
-- Traduction: provider configurable, implementation `openai` disponible.
+- Traduction: provider configurable, implementations `openai` et `gemini` disponibles.
 - Merge SRT: fusion + recalage temporel + renumerotation.
 - Etat: CSV `path,downloaded,segmented,transcribed,translated`.
 
@@ -25,11 +25,12 @@ Pipeline Python pour transcrire et traduire des playlists YouTube, execute princ
   - `yt-dlp`
   - `openai-whisper`
   - `openai`
+  - `google-genai` pour Gemini
 
 Installation rapide:
 ```bash
 python -m pip install --upgrade pip
-python -m pip install python-dotenv yt-dlp openai-whisper openai
+python -m pip install python-dotenv yt-dlp openai-whisper openai google-genai
 ```
 
 ### Colab
@@ -108,6 +109,8 @@ Notes:
 - utilise `TRANSLATION_CONTEXT` pour injecter du contexte metier/culturel libre
 - par defaut, la traduction utilise `gpt-5-mini`
 - les appels retry uniquement sur erreurs transitoires (`429`, `408`, `409`, `5xx`, timeout/connexion)
+- `TRANSLATION_PROVIDER` accepte `openai` et `gemini`
+- pour un mode quota gratuit / cout minimal, utiliser `TRANSLATION_PROVIDER=gemini` et `TRANSLATION_MODEL=gemini-2.5-flash-lite`
 
 ### 5) Merge
 ```bash
@@ -152,11 +155,13 @@ PYTHONPATH=src python -m unittest discover -s tests -v
   - Installer `openai-whisper`
 - `Runtime error: openai package is required for GPT translation`
   - Installer `openai`
+- `Runtime error: google-genai package is required for Gemini translation`
+  - Installer `google-genai`
 - `shell-init: error retrieving current directory` en Colab
   - Cause: suppression de `/content/transcription` alors que la session est deja dans ce dossier.
   - Fix: faire `os.chdir("/content")` avant de supprimer/recloner le projet (deja gere dans `colab/runner-colab.md`).
 
 ## Limites actuelles
 - Transcription et traduction sequentielles.
-- Providers de traduction vises a terme, mais seule l'implementation `openai` est disponible.
+- Providers de traduction disponibles: `openai`, `gemini`.
 - Pas de stockage Drive API (montage Drive uniquement).

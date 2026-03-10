@@ -6,7 +6,7 @@ Ce projet automatise la transcription et la traduction de videos YouTube (playli
 ## Perimetre actuel
 - Source: playlist YouTube.
 - Transcription: `openai-whisper`.
-- Traduction: provider configurable, implementation `openai` disponible.
+- Traduction: provider configurable, implementations `openai` et `gemini` disponibles.
 - Stockage: point de montage `/content/drive/...`.
 - Configuration: `.env` + surcharge CLI.
 - Hors perimetre actuel: multi-agent, stockage Drive API.
@@ -21,10 +21,11 @@ Ce projet automatise la transcription et la traduction de videos YouTube (playli
   - `yt-dlp`
   - `openai-whisper`
   - `openai`
+  - `google-genai` pour Gemini
 
 Installation rapide:
 ```bash
-pip install python-dotenv yt-dlp openai-whisper openai
+pip install python-dotenv yt-dlp openai-whisper openai google-genai
 ```
 
 ## Configuration
@@ -48,6 +49,8 @@ Variables principales:
 - `TRANSLATION_PROVIDER`
 - `TRANSLATION_MODEL`
 - `TRANSLATION_API_KEY`
+- `TRANSLATION_MAX_RETRIES`
+- `TRANSLATION_RETRY_BASE_DELAY_SECONDS`
 - `TRANSLATION_CONTEXT`
 - `TRANSLATION_PROMPT_VERSION`
 - `USE_MOCK`
@@ -78,7 +81,7 @@ Important: au stade actuel, les etapes `download`, `segment`, `transcribe`, `tra
 Si `yt-dlp` n'est pas installe, la CLI retourne une erreur explicite sur `download`.
 `WHISPER_LANGUAGE` reste la langue source de reference pour la future traduction.
 Le CSV d'etat suit maintenant `downloaded`, `segmented`, `transcribed`, `translated` et reste compatible avec les anciens fichiers.
-Le moteur de traduction est pense pour etre interchangeable par provider via une factory (`openai` pour l'instant, extensible ensuite a `mistral`, `gemini`, etc.).
+Le moteur de traduction est interchangeable par provider via une factory. Les providers disponibles sont `openai` et `gemini`.
 La traduction peut etre contextualisee avec `SOURCE_VARIANT` (ex: `tunisian_arabic`) et `TRANSLATION_CONTEXT`.
 La traduction valide maintenant la structure SRT avant d'accepter un segment traduit.
 
@@ -146,6 +149,7 @@ PYTHONPATH=src python -m transcription.cli.main \
 
 Prerequis:
 - package `openai`
+- package `google-genai` si `TRANSLATION_PROVIDER=gemini`
 - `TRANSLATION_API_KEY` renseignee si le provider le necessite
 
 Comportement:
@@ -155,6 +159,8 @@ Comportement:
 - Skippe les segments deja traduits.
 - Utilise `SOURCE_VARIANT` et `TRANSLATION_CONTEXT` pour enrichir le prompt.
 - Utilise `gpt-5-mini` par defaut.
+- `TRANSLATION_PROVIDER` accepte `openai` et `gemini`.
+- Pour viser le free tier Gemini, utiliser `TRANSLATION_PROVIDER=gemini` et `TRANSLATION_MODEL=gemini-2.5-flash-lite`.
 - Retry automatiquement seulement sur erreurs transitoires (`429`, `408`, `409`, `5xx`, timeout/connexion).
 - Valide structurellement le SRT traduit avant de l'accepter.
 - Met a jour l'etat CSV en `translated=true` seulement si tous les segments passent.

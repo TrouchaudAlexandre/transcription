@@ -33,6 +33,7 @@ subprocess.run(
         "yt-dlp",
         "openai-whisper",
         "openai",
+        "google-genai",
     ],
     check=True,
 )
@@ -57,6 +58,7 @@ os.chdir(PROJECT_DIR)
 # - SOURCE_VARIANT
 # - TRANSLATION_CONTEXT
 # - TRANSLATION_MODEL=gpt-5-mini
+# - TRANSLATION_PROVIDER=openai|gemini
 
 # 3) Lancer les etapes du pipeline
 !PYTHONPATH=src python -m transcription.cli.main --step download
@@ -69,6 +71,7 @@ os.chdir(PROJECT_DIR)
 ## Notes
 - Modifier `REPO_URL` avant execution.
 - Modifier `.env` apres copie si tes chemins Drive ou tes parametres de traduction different.
-- Pour la traduction GPT, renseigner `TRANSLATION_API_KEY` dans `.env`.
+- Pour la traduction, renseigner `TRANSLATION_API_KEY` dans `.env`.
+- Si `TRANSLATION_PROVIDER=gemini`, `google-genai` est deja installe par ce runner.
 - Pour un dialecte comme le tunisien, utiliser `SOURCE_VARIANT=tunisian_arabic` et completer `TRANSLATION_CONTEXT` si necessaire.
 - Tu peux relancer une etape seule (`--step segment` par ex.) grace au CSV d'etat.

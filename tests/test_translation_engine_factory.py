@@ -3,6 +3,9 @@ import unittest
 from pathlib import Path
 
 from transcription.config.settings import Settings
+from transcription.infrastructure.translation.gemini_translation_engine import (
+    GeminiTranslationEngine,
+)
 from transcription.infrastructure.translation.openai_translation_engine import (
     OpenAITranslationEngine,
 )
@@ -43,7 +46,7 @@ class TranslationEngineFactoryTests(unittest.TestCase):
 
         self.assertIsInstance(engine, OpenAITranslationEngine)
 
-    def test_create_rejects_unknown_provider(self) -> None:
+    def test_create_returns_gemini_engine(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             settings = Settings(
                 playlist_csv=str(Path(tmp) / "playlists.csv"),
@@ -61,7 +64,38 @@ class TranslationEngineFactoryTests(unittest.TestCase):
                 source_variant="",
                 target_language="French",
                 translation_provider="gemini",
-                translation_model="gemini-2.0-flash",
+                translation_model="gemini-3.1-flash-lite",
+                translation_api_key="secret",
+                translation_max_retries=3,
+                translation_retry_base_delay_seconds=2.0,
+                translation_context="",
+                translation_prompt_version="v1",
+                use_mock=False,
+            )
+
+            engine = TranslationEngineFactory.create(settings)
+
+        self.assertIsInstance(engine, GeminiTranslationEngine)
+
+    def test_create_rejects_unknown_provider(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            settings = Settings(
+                playlist_csv=str(Path(tmp) / "playlists.csv"),
+                files_list_csv=str(Path(tmp) / "files.csv"),
+                log_path=str(Path(tmp) / "log.txt"),
+                audio_base_path=str(Path(tmp) / "audio"),
+                video_base_path=str(Path(tmp) / "video"),
+                segmentation_root=str(Path(tmp) / "seg"),
+                transcription_root=str(Path(tmp) / "tr"),
+                translation_root=str(Path(tmp) / "translation"),
+                output_root=str(Path(tmp) / "output"),
+                segment_length_seconds=60,
+                whisper_model="large-v3-turbo",
+                language="Arabic",
+                source_variant="",
+                target_language="French",
+                translation_provider="unknown",
+                translation_model="unknown-model",
                 translation_api_key="secret",
                 translation_max_retries=3,
                 translation_retry_base_delay_seconds=2.0,
