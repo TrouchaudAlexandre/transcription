@@ -5,6 +5,7 @@ from pathlib import Path
 from transcription.application.translate_use_case import TranslateUseCase
 from transcription.domain.interfaces.state_repository import FileState
 from transcription.infrastructure.state.csv_state_repository import CsvStateRepository
+from transcription.infrastructure.translation.srt_validator import DeterministicSrtValidator
 
 
 class FakeLogger:
@@ -70,6 +71,7 @@ class TranslateUseCaseTests(unittest.TestCase):
             engine = FakeTranslationEngine()
             use_case = TranslateUseCase(
                 engine=engine,
+                validator=DeterministicSrtValidator(),
                 state_repository=repo,
                 logger=logger,
                 transcription_root=str(Path(tmp) / "transcription"),
@@ -114,6 +116,7 @@ class TranslateUseCaseTests(unittest.TestCase):
             engine = FakeTranslationEngine()
             use_case = TranslateUseCase(
                 engine=engine,
+                validator=DeterministicSrtValidator(),
                 state_repository=repo,
                 logger=logger,
                 transcription_root=str(Path(tmp) / "transcription"),
@@ -148,6 +151,7 @@ class TranslateUseCaseTests(unittest.TestCase):
             engine = FakeTranslationEngine(fail=True)
             use_case = TranslateUseCase(
                 engine=engine,
+                validator=DeterministicSrtValidator(),
                 state_repository=repo,
                 logger=logger,
                 transcription_root=str(Path(tmp) / "transcription"),
@@ -163,6 +167,43 @@ class TranslateUseCaseTests(unittest.TestCase):
             self.assertFalse(repo.get(str(audio)).translated)
             self.assertTrue(any("Translation segment failed" in msg for msg in logger.errors))
             self.assertTrue(any("Translation incomplete" in msg for msg in logger.errors))
+
+    def test_keep_state_false_when_translation_breaks_srt_format(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            audio = Path(tmp) / "audio" / "playlist" / "ep1.m4a"
+            source_dir = Path(tmp) / "transcription" / "playlist" / "ep1.m4a"
+            seg1 = source_dir / "ep1_part_1.srt"
+
+            audio.parent.mkdir(parents=True, exist_ok=True)
+            source_dir.mkdir(parents=True, exist_ok=True)
+            audio.write_text("a", encoding="utf-8")
+            seg1.write_text("1\n00:00:00,000 --> 00:00:01,000\nHello\n", encoding="utf-8")
+
+            repo = CsvStateRepository(str(Path(tmp) / "files.csv"))
+            repo.upsert(FileState(str(audio), True, True, True, False))
+
+            logger = FakeLogger()
+            engine = FakeTranslationEngine()
+            engine.translate_srt_segment = (  # type: ignore[method-assign]
+                lambda **_: "1\n00:00:05,000 --> 00:00:06,000\nBonjour\n"
+            )
+            use_case = TranslateUseCase(
+                engine=engine,
+                validator=DeterministicSrtValidator(),
+                state_repository=repo,
+                logger=logger,
+                transcription_root=str(Path(tmp) / "transcription"),
+                translation_root=str(Path(tmp) / "translation"),
+                source_language="Arabic",
+                source_variant="",
+                target_language="French",
+                translation_context="",
+            )
+
+            use_case.execute()
+
+            self.assertFalse(repo.get(str(audio)).translated)
+            self.assertTrue(any("timecode mismatch" in msg.lower() for msg in logger.errors))
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from transcription.domain.interfaces.logger import Logger
+from transcription.domain.interfaces.srt_validator import SrtValidator
 from transcription.domain.interfaces.state_repository import FileState, StateRepository
 from transcription.domain.interfaces.translation_engine import TranslationEngine
 
@@ -13,6 +14,7 @@ class TranslateUseCase:
     def __init__(
         self,
         engine: TranslationEngine,
+        validator: SrtValidator,
         state_repository: StateRepository,
         logger: Logger,
         transcription_root: str,
@@ -23,6 +25,7 @@ class TranslateUseCase:
         translation_context: str,
     ) -> None:
         self._engine = engine
+        self._validator = validator
         self._state_repository = state_repository
         self._logger = logger
         self._transcription_root = Path(transcription_root)
@@ -60,13 +63,15 @@ class TranslateUseCase:
 
                 self._logger.info(f"Translation segment start: {label}")
                 try:
+                    source_srt = source_file.read_text(encoding="utf-8")
                     translated = self._engine.translate_srt_segment(
-                        source_srt=source_file.read_text(encoding="utf-8"),
+                        source_srt=source_srt,
                         source_language=self._source_language,
                         source_variant=self._source_variant,
                         target_language=self._target_language,
                         translation_context=self._translation_context,
                     )
+                    self._validator.validate_pair(source_srt, translated)
                     output_file.write_text(translated.strip() + "\n", encoding="utf-8")
                 except Exception as exc:  # pylint: disable=broad-except
                     self._logger.error(f"Translation segment failed: {label}: {exc}")

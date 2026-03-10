@@ -77,6 +77,7 @@ Le CSV d'etat est en cours d'evolution phase 2 pour ajouter le suivi global `tra
 Le moteur GPT de traduction est maintenant present dans le code, mais pas encore branche dans la CLI.
 Le moteur de traduction est pense pour etre interchangeable par provider via une factory (`openai` pour l'instant, extensible ensuite a `mistral`, `gemini`, etc.).
 La future traduction pourra etre contextualisee avec `SOURCE_VARIANT` (ex: `tunisian_arabic`) et `TRANSLATION_CONTEXT`.
+La traduction valide maintenant la structure SRT avant d'accepter un segment traduit.
 
 ## Workflow cible (une fois toutes les briques V1 terminees)
 1. Download des medias de playlist.
@@ -191,3 +192,4 @@ Checklist minimale par ticket:
 - P2-T2: ajout des parametres de configuration necessaires a la future brique de traduction.
 - P2-T4: ajout de l'interface de traduction et du moteur OpenAI/GPT, non encore branche a une etape CLI.
 - P2-T5: ajout de la brique `translate` avec reprise par segment, provider configurable, `SOURCE_VARIANT` et `TRANSLATION_CONTEXT`.
+- P2-T6: ajout d'une validation deterministe du format SRT traduit avant acceptation d'un segment.
