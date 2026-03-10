@@ -1,25 +1,30 @@
 # Documentation utilisateur
 
 ## Objectif
-Ce projet automatise la transcription de videos YouTube (playlist) avec Whisper, en execution Colab, avec stockage sur Google Drive monte.
+Ce projet automatise la transcription et la traduction de videos YouTube (playlist), en execution Colab, avec stockage sur Google Drive monte.
 
-## Perimetre V1
+## Perimetre actuel
 - Source: playlist YouTube.
 - Transcription: `openai-whisper`.
+- Traduction: provider configurable, implementation `openai` disponible.
 - Stockage: point de montage `/content/drive/...`.
 - Configuration: `.env` + surcharge CLI.
-- Hors perimetre: traduction.
+- Hors perimetre actuel: multi-agent, stockage Drive API.
 
 ## Prerequis
 - Google Colab.
 - Drive monte dans Colab.
 - Python 3.10+.
 - Outils systeme: `ffmpeg`.
-- Dependances Python (a finaliser dans les prochains tickets): `python-dotenv`, `yt-dlp`, `openai-whisper`.
+- Dependances Python:
+  - `python-dotenv`
+  - `yt-dlp`
+  - `openai-whisper`
+  - `openai`
 
 Installation rapide:
 ```bash
-pip install python-dotenv yt-dlp
+pip install python-dotenv yt-dlp openai-whisper openai
 ```
 
 ## Configuration
@@ -69,21 +74,20 @@ PYTHONPATH=/home/20104112/Documents/Perso/project/transcription/src \
   --files-list-csv "/content/drive/MyDrive/Colab Notebooks/ressource/files_list.csv"
 ```
 
-Important: au stade actuel, les etapes `download`, `segment`, `transcribe` et `merge` sont implementees.
+Important: au stade actuel, les etapes `download`, `segment`, `transcribe`, `translate` et `merge` sont implementees.
 Si `yt-dlp` n'est pas installe, la CLI retourne une erreur explicite sur `download`.
-Les parametres de traduction sont exposes en configuration pour preparer la phase 2, mais l'etape `translate` n'est pas encore implementee.
 `WHISPER_LANGUAGE` reste la langue source de reference pour la future traduction.
-Le CSV d'etat est en cours d'evolution phase 2 pour ajouter le suivi global `translated` tout en restant compatible avec les anciens fichiers.
-Le moteur GPT de traduction est maintenant present dans le code, mais pas encore branche dans la CLI.
+Le CSV d'etat suit maintenant `downloaded`, `segmented`, `transcribed`, `translated` et reste compatible avec les anciens fichiers.
 Le moteur de traduction est pense pour etre interchangeable par provider via une factory (`openai` pour l'instant, extensible ensuite a `mistral`, `gemini`, etc.).
-La future traduction pourra etre contextualisee avec `SOURCE_VARIANT` (ex: `tunisian_arabic`) et `TRANSLATION_CONTEXT`.
+La traduction peut etre contextualisee avec `SOURCE_VARIANT` (ex: `tunisian_arabic`) et `TRANSLATION_CONTEXT`.
 La traduction valide maintenant la structure SRT avant d'accepter un segment traduit.
 
-## Workflow cible (une fois toutes les briques V1 terminees)
+## Workflow actuel
 1. Download des medias de playlist.
 2. Segmentation audio.
 3. Transcription Whisper.
-4. Fusion SRT.
+4. Traduction des segments SRT.
+5. Fusion SRT source et traduit.
 
 ## Segmentation (T5)
 Commande:
@@ -124,6 +128,34 @@ Comportement:
 - Met a jour l'etat CSV en `transcribed=true` (audio et video associee si presente).
 - Journalise chaque segment individuellement (`start`, `done`, `skip`, `failed`).
 - En cas d'echec partiel, les segments deja transcrits sont detectes et skippes au relancement.
+
+## Traduction (Phase 2)
+Commande:
+```bash
+PYTHONPATH=src python -m transcription.cli.main \
+  --step translate \
+  --files-list-csv "/content/drive/MyDrive/Colab Notebooks/ressource/files_list.csv" \
+  --transcription-root "/content/drive/MyDrive/Colab Notebooks/creation/transcription" \
+  --translation-root "/content/drive/MyDrive/Colab Notebooks/creation/translation" \
+  --language "Arabic" \
+  --source-variant "tunisian_arabic" \
+  --target-language "French" \
+  --translation-provider "openai" \
+  --translation-model "gpt-4.1-mini"
+```
+
+Prerequis:
+- package `openai`
+- `TRANSLATION_API_KEY` renseignee si le provider le necessite
+
+Comportement:
+- Lit les segments SRT source dans `TRANSCRIPTION_ROOT`.
+- Ecrit les segments traduits dans `TRANSLATION_ROOT`.
+- Journalise chaque segment (`start`, `done`, `skip`, `failed`).
+- Skippe les segments deja traduits.
+- Utilise `SOURCE_VARIANT` et `TRANSLATION_CONTEXT` pour enrichir le prompt.
+- Valide structurellement le SRT traduit avant de l'accepter.
+- Met a jour l'etat CSV en `translated=true` seulement si tous les segments passent.
 
 ## Merge SRT (T7)
 Commande:
@@ -196,3 +228,5 @@ Checklist minimale par ticket:
 - P2-T5: ajout de la brique `translate` avec reprise par segment, provider configurable, `SOURCE_VARIANT` et `TRANSLATION_CONTEXT`.
 - P2-T6: ajout d'une validation deterministe du format SRT traduit avant acceptation d'un segment.
 - P2-T7: le merge produit maintenant le SRT final source et le SRT final traduit.
+- P2-T8: le runner Colab couvre maintenant le pipeline complet avec traduction.
+- P2-T9: documentation utilisateur finalisee et synchronisee avec la phase 2.
