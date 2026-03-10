@@ -62,5 +62,6 @@ class DownloadUseCase:
                 downloaded=True,
                 segmented=current.segmented if current else False,
                 transcribed=current.transcribed if current else False,
+                translated=current.translated if current else False,
             )
         )

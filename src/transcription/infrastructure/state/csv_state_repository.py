@@ -37,6 +37,7 @@ class CsvStateRepository(StateRepository):
                     "true" if item.downloaded else "false",
                     "true" if item.segmented else "false",
                     "true" if item.transcribed else "false",
+                    "true" if item.translated else "false",
                 ])
 
     def list_all(self) -> Iterable[FileState]:
@@ -55,6 +56,7 @@ class CsvStateRepository(StateRepository):
                         downloaded=self._as_bool(row, 1),
                         segmented=self._as_bool(row, 2),
                         transcribed=self._as_bool(row, 3),
+                        translated=self._as_bool(row, 4),
                     )
                 )
         return states

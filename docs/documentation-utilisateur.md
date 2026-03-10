@@ -70,6 +70,7 @@ Important: au stade actuel, les etapes `download`, `segment`, `transcribe` et `m
 Si `yt-dlp` n'est pas installe, la CLI retourne une erreur explicite sur `download`.
 Les parametres de traduction sont exposes en configuration pour preparer la phase 2, mais l'etape `translate` n'est pas encore implementee.
 `WHISPER_LANGUAGE` reste la langue source de reference pour la future traduction.
+Le CSV d'etat est en cours d'evolution phase 2 pour ajouter le suivi global `translated` tout en restant compatible avec les anciens fichiers.
 
 ## Workflow cible (une fois toutes les briques V1 terminees)
 1. Download des medias de playlist.

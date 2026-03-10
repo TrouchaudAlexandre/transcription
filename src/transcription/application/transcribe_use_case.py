@@ -108,6 +108,7 @@ class TranscribeUseCase:
                 downloaded=current.downloaded,
                 segmented=current.segmented,
                 transcribed=True,
+                translated=current.translated,
             )
         )
 
@@ -122,5 +123,6 @@ class TranscribeUseCase:
                 downloaded=current.downloaded,
                 segmented=current.segmented,
                 transcribed=True,
+                translated=current.translated,
             )
         )

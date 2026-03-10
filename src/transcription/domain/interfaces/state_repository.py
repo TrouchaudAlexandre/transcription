@@ -11,6 +11,7 @@ class FileState:
     downloaded: bool
     segmented: bool
     transcribed: bool
+    translated: bool = False
 
 
 class StateRepository(ABC):
