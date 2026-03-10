@@ -3,12 +3,12 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from transcription.application.run_merge import run_merge
+from transcription.application.run_translate import run_translate
 from transcription.config.settings import Settings
 
 
-class RunMergeTests(unittest.TestCase):
-    def test_run_merge_wires_and_executes_use_case(self) -> None:
+class RunTranslateTests(unittest.TestCase):
+    def test_run_translate_wires_and_executes_use_case(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             settings = Settings(
                 playlist_csv=str(Path(tmp) / "playlists.csv"),
@@ -23,21 +23,19 @@ class RunMergeTests(unittest.TestCase):
                 segment_length_seconds=60,
                 whisper_model="large-v3-turbo",
                 language="Arabic",
-                source_variant="",
+                source_variant="tunisian_arabic",
                 target_language="French",
                 translation_provider="openai",
                 translation_model="gpt-4.1-mini",
-                translation_api_key="",
-                translation_context="",
+                translation_api_key="secret",
+                translation_context="keep local references",
                 translation_prompt_version="v1",
                 use_mock=False,
             )
-            with mock.patch("transcription.application.run_merge.MergeUseCase") as use_case_cls:
-                run_merge(settings)
+            with mock.patch(
+                "transcription.application.run_translate.TranslateUseCase"
+            ) as use_case_cls:
+                run_translate(settings)
 
         use_case_cls.assert_called_once()
         use_case_cls.return_value.execute.assert_called_once()
-
-
-if __name__ == "__main__":
-    unittest.main()

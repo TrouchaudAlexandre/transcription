@@ -14,26 +14,37 @@ class CliMainTests(unittest.TestCase):
         self.assertEqual(args.step, "segment")
         args = parser.parse_args(["--step", "transcribe"])
         self.assertEqual(args.step, "transcribe")
+        args = parser.parse_args(["--step", "translate"])
+        self.assertEqual(args.step, "translate")
         args = parser.parse_args(["--step", "merge"])
         self.assertEqual(args.step, "merge")
         args = parser.parse_args(
             [
+                "--source-variant",
+                "tunisian_arabic",
                 "--translation-root",
                 "/tmp/translation",
                 "--target-language",
                 "English",
+                "--translation-provider",
+                "gemini",
                 "--translation-model",
                 "gpt-test",
-                "--openai-api-key",
+                "--translation-api-key",
                 "secret",
+                "--translation-context",
+                "keep cultural references",
                 "--translation-prompt-version",
                 "v2",
             ]
         )
+        self.assertEqual(args.source_variant, "tunisian_arabic")
         self.assertEqual(args.translation_root, "/tmp/translation")
         self.assertEqual(args.target_language, "English")
+        self.assertEqual(args.translation_provider, "gemini")
         self.assertEqual(args.translation_model, "gpt-test")
-        self.assertEqual(args.openai_api_key, "secret")
+        self.assertEqual(args.translation_api_key, "secret")
+        self.assertEqual(args.translation_context, "keep cultural references")
         self.assertEqual(args.translation_prompt_version, "v2")
 
     def test_main_calls_run_download(self) -> None:
@@ -73,6 +84,20 @@ class CliMainTests(unittest.TestCase):
         run_segment.assert_not_called()
         run_transcribe.assert_not_called()
         run_merge.assert_called_once()
+
+    def test_main_calls_run_translate(self) -> None:
+        with mock.patch("transcription.cli.main.run_download") as run_download:
+            with mock.patch("transcription.cli.main.run_segment") as run_segment:
+                with mock.patch("transcription.cli.main.run_transcribe") as run_transcribe:
+                    with mock.patch("transcription.cli.main.run_translate") as run_translate:
+                        with mock.patch("transcription.cli.main.run_merge") as run_merge:
+                            with mock.patch("sys.argv", ["prog", "--step", "translate"]):
+                                main.main()
+        run_download.assert_not_called()
+        run_segment.assert_not_called()
+        run_transcribe.assert_not_called()
+        run_translate.assert_called_once()
+        run_merge.assert_not_called()
 
     def test_main_handles_runtime_error(self) -> None:
         with mock.patch(

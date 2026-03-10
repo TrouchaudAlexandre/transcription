@@ -7,6 +7,7 @@ import sys
 from transcription.application.run_download import run_download
 from transcription.application.run_merge import run_merge
 from transcription.application.run_segment import run_segment
+from transcription.application.run_translate import run_translate
 from transcription.application.run_transcribe import run_transcribe
 from transcription.config.settings import load_settings, override_settings
 
@@ -25,15 +26,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--segment-length-seconds")
     parser.add_argument("--whisper-model")
     parser.add_argument("--language")
+    parser.add_argument("--source-variant")
     parser.add_argument("--target-language")
+    parser.add_argument("--translation-provider")
     parser.add_argument("--translation-model")
-    parser.add_argument("--openai-api-key")
+    parser.add_argument("--translation-api-key")
+    parser.add_argument("--translation-context")
     parser.add_argument("--translation-prompt-version")
     parser.add_argument("--use-mock")
     parser.add_argument(
         "--step",
         default="download",
-        choices=["download", "segment", "transcribe", "merge"],
+        choices=["download", "segment", "transcribe", "translate", "merge"],
         help="Pipeline step to execute.",
     )
     return parser
@@ -58,9 +62,12 @@ def main() -> None:
         segment_length_seconds=args.segment_length_seconds,
         whisper_model=args.whisper_model,
         language=args.language,
+        source_variant=args.source_variant,
         target_language=args.target_language,
+        translation_provider=args.translation_provider,
         translation_model=args.translation_model,
-        openai_api_key=args.openai_api_key,
+        translation_api_key=args.translation_api_key,
+        translation_context=args.translation_context,
         translation_prompt_version=args.translation_prompt_version,
         use_mock=args.use_mock,
     )
@@ -72,6 +79,8 @@ def main() -> None:
             run_segment(settings)
         if args.step == "transcribe":
             run_transcribe(settings)
+        if args.step == "translate":
+            run_translate(settings)
         if args.step == "merge":
             run_merge(settings)
     except RuntimeError as exc:

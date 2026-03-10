@@ -38,9 +38,12 @@ Variables principales:
 - `SEGMENT_LENGTH_SECONDS`
 - `WHISPER_MODEL`
 - `WHISPER_LANGUAGE`
+- `SOURCE_VARIANT`
 - `TARGET_LANGUAGE`
+- `TRANSLATION_PROVIDER`
 - `TRANSLATION_MODEL`
-- `OPENAI_API_KEY`
+- `TRANSLATION_API_KEY`
+- `TRANSLATION_CONTEXT`
 - `TRANSLATION_PROMPT_VERSION`
 - `USE_MOCK`
 
@@ -71,6 +74,9 @@ Si `yt-dlp` n'est pas installe, la CLI retourne une erreur explicite sur `downlo
 Les parametres de traduction sont exposes en configuration pour preparer la phase 2, mais l'etape `translate` n'est pas encore implementee.
 `WHISPER_LANGUAGE` reste la langue source de reference pour la future traduction.
 Le CSV d'etat est en cours d'evolution phase 2 pour ajouter le suivi global `translated` tout en restant compatible avec les anciens fichiers.
+Le moteur GPT de traduction est maintenant present dans le code, mais pas encore branche dans la CLI.
+Le moteur de traduction est pense pour etre interchangeable par provider via une factory (`openai` pour l'instant, extensible ensuite a `mistral`, `gemini`, etc.).
+La future traduction pourra etre contextualisee avec `SOURCE_VARIANT` (ex: `tunisian_arabic`) et `TRANSLATION_CONTEXT`.
 
 ## Workflow cible (une fois toutes les briques V1 terminees)
 1. Download des medias de playlist.
@@ -183,3 +189,5 @@ Checklist minimale par ticket:
 - T8: ajout du runner Colab minimal et du fichier `.env.example`.
 - T9: ajout de `README.md` avec guide complet d'utilisation (local + Colab + troubleshooting).
 - P2-T2: ajout des parametres de configuration necessaires a la future brique de traduction.
+- P2-T4: ajout de l'interface de traduction et du moteur OpenAI/GPT, non encore branche a une etape CLI.
+- P2-T5: ajout de la brique `translate` avec reprise par segment, provider configurable, `SOURCE_VARIANT` et `TRANSLATION_CONTEXT`.

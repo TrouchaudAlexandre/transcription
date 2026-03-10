@@ -23,9 +23,12 @@ class RunTranscribeTests(unittest.TestCase):
                 segment_length_seconds=60,
                 whisper_model="large-v3-turbo",
                 language="Arabic",
+                source_variant="",
                 target_language="French",
+                translation_provider="openai",
                 translation_model="gpt-4.1-mini",
-                openai_api_key="",
+                translation_api_key="",
+                translation_context="",
                 translation_prompt_version="v1",
                 use_mock=False,
             )

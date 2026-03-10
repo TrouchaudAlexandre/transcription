@@ -25,9 +25,12 @@ class Settings:
     segment_length_seconds: int
     whisper_model: str
     language: str
+    source_variant: str
     target_language: str
+    translation_provider: str
     translation_model: str
-    openai_api_key: str
+    translation_api_key: str
+    translation_context: str
     translation_prompt_version: str
     use_mock: bool
 
@@ -79,9 +82,12 @@ def load_settings() -> Settings:
         segment_length_seconds=int(env("SEGMENT_LENGTH_SECONDS", "60")),
         whisper_model=env("WHISPER_MODEL", "large-v3-turbo"),
         language=env("WHISPER_LANGUAGE", "Arabic"),
+        source_variant=env("SOURCE_VARIANT", ""),
         target_language=env("TARGET_LANGUAGE", "French"),
+        translation_provider=env("TRANSLATION_PROVIDER", "openai"),
         translation_model=env("TRANSLATION_MODEL", "gpt-4.1-mini"),
-        openai_api_key=env("OPENAI_API_KEY", ""),
+        translation_api_key=env("TRANSLATION_API_KEY", ""),
+        translation_context=env("TRANSLATION_CONTEXT", ""),
         translation_prompt_version=env("TRANSLATION_PROMPT_VERSION", "v1"),
         use_mock=env("USE_MOCK", "false").lower() == "true",
     )
