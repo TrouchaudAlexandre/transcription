@@ -20,10 +20,15 @@ class Settings:
     video_base_path: str
     segmentation_root: str
     transcription_root: str
+    translation_root: str
     output_root: str
     segment_length_seconds: int
     whisper_model: str
     language: str
+    target_language: str
+    translation_model: str
+    openai_api_key: str
+    translation_prompt_version: str
     use_mock: bool
 
 
@@ -63,6 +68,10 @@ def load_settings() -> Settings:
             "TRANSCRIPTION_ROOT",
             "/content/drive/MyDrive/Colab Notebooks/creation/transcription",
         ),
+        translation_root=env(
+            "TRANSLATION_ROOT",
+            "/content/drive/MyDrive/Colab Notebooks/creation/translation",
+        ),
         output_root=env(
             "OUTPUT_ROOT",
             "/content/drive/MyDrive/Colab Notebooks/creation/resultat",
@@ -70,6 +79,10 @@ def load_settings() -> Settings:
         segment_length_seconds=int(env("SEGMENT_LENGTH_SECONDS", "60")),
         whisper_model=env("WHISPER_MODEL", "large-v3-turbo"),
         language=env("WHISPER_LANGUAGE", "Arabic"),
+        target_language=env("TARGET_LANGUAGE", "French"),
+        translation_model=env("TRANSLATION_MODEL", "gpt-4.1-mini"),
+        openai_api_key=env("OPENAI_API_KEY", ""),
+        translation_prompt_version=env("TRANSLATION_PROMPT_VERSION", "v1"),
         use_mock=env("USE_MOCK", "false").lower() == "true",
     )
 

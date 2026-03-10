@@ -33,10 +33,15 @@ Variables principales:
 - `VIDEO_BASE_PATH`
 - `SEGMENTATION_ROOT`
 - `TRANSCRIPTION_ROOT`
+- `TRANSLATION_ROOT`
 - `OUTPUT_ROOT`
 - `SEGMENT_LENGTH_SECONDS`
 - `WHISPER_MODEL`
 - `WHISPER_LANGUAGE`
+- `TARGET_LANGUAGE`
+- `TRANSLATION_MODEL`
+- `OPENAI_API_KEY`
+- `TRANSLATION_PROMPT_VERSION`
 - `USE_MOCK`
 
 ## Utilisation CLI (etat actuel)
@@ -61,8 +66,10 @@ PYTHONPATH=/home/20104112/Documents/Perso/project/transcription/src \
   --files-list-csv "/content/drive/MyDrive/Colab Notebooks/ressource/files_list.csv"
 ```
 
-Important: au stade actuel (T7), les etapes `download`, `segment`, `transcribe` et `merge` sont implementees.
+Important: au stade actuel, les etapes `download`, `segment`, `transcribe` et `merge` sont implementees.
 Si `yt-dlp` n'est pas installe, la CLI retourne une erreur explicite sur `download`.
+Les parametres de traduction sont exposes en configuration pour preparer la phase 2, mais l'etape `translate` n'est pas encore implementee.
+`WHISPER_LANGUAGE` reste la langue source de reference pour la future traduction.
 
 ## Workflow cible (une fois toutes les briques V1 terminees)
 1. Download des medias de playlist.
@@ -174,3 +181,4 @@ Checklist minimale par ticket:
 - T7: ajout de la brique merge SRT avec option CLI `--step merge`.
 - T8: ajout du runner Colab minimal et du fichier `.env.example`.
 - T9: ajout de `README.md` avec guide complet d'utilisation (local + Colab + troubleshooting).
+- P2-T2: ajout des parametres de configuration necessaires a la future brique de traduction.

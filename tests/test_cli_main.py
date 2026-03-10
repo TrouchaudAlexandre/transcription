@@ -16,6 +16,25 @@ class CliMainTests(unittest.TestCase):
         self.assertEqual(args.step, "transcribe")
         args = parser.parse_args(["--step", "merge"])
         self.assertEqual(args.step, "merge")
+        args = parser.parse_args(
+            [
+                "--translation-root",
+                "/tmp/translation",
+                "--target-language",
+                "English",
+                "--translation-model",
+                "gpt-test",
+                "--openai-api-key",
+                "secret",
+                "--translation-prompt-version",
+                "v2",
+            ]
+        )
+        self.assertEqual(args.translation_root, "/tmp/translation")
+        self.assertEqual(args.target_language, "English")
+        self.assertEqual(args.translation_model, "gpt-test")
+        self.assertEqual(args.openai_api_key, "secret")
+        self.assertEqual(args.translation_prompt_version, "v2")
 
     def test_main_calls_run_download(self) -> None:
         with mock.patch("transcription.cli.main.run_download") as run_download:

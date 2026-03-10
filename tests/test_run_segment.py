@@ -18,10 +18,15 @@ class RunSegmentTests(unittest.TestCase):
                 video_base_path=str(Path(tmp) / "video"),
                 segmentation_root=str(Path(tmp) / "segmentation"),
                 transcription_root=str(Path(tmp) / "transcription"),
+                translation_root=str(Path(tmp) / "translation"),
                 output_root=str(Path(tmp) / "output"),
                 segment_length_seconds=60,
                 whisper_model="large-v3-turbo",
                 language="Arabic",
+                target_language="French",
+                translation_model="gpt-4.1-mini",
+                openai_api_key="",
+                translation_prompt_version="v1",
                 use_mock=False,
             )
             with mock.patch(

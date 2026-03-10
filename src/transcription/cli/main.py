@@ -20,10 +20,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--video-base-path")
     parser.add_argument("--segmentation-root")
     parser.add_argument("--transcription-root")
+    parser.add_argument("--translation-root")
     parser.add_argument("--output-root")
     parser.add_argument("--segment-length-seconds")
     parser.add_argument("--whisper-model")
     parser.add_argument("--language")
+    parser.add_argument("--target-language")
+    parser.add_argument("--translation-model")
+    parser.add_argument("--openai-api-key")
+    parser.add_argument("--translation-prompt-version")
     parser.add_argument("--use-mock")
     parser.add_argument(
         "--step",
@@ -48,10 +53,15 @@ def main() -> None:
         video_base_path=args.video_base_path,
         segmentation_root=args.segmentation_root,
         transcription_root=args.transcription_root,
+        translation_root=args.translation_root,
         output_root=args.output_root,
         segment_length_seconds=args.segment_length_seconds,
         whisper_model=args.whisper_model,
         language=args.language,
+        target_language=args.target_language,
+        translation_model=args.translation_model,
+        openai_api_key=args.openai_api_key,
+        translation_prompt_version=args.translation_prompt_version,
         use_mock=args.use_mock,
     )
 

@@ -15,6 +15,9 @@ class SettingsTests(unittest.TestCase):
                 "SEGMENT_LENGTH_SECONDS": "90",
                 "USE_MOCK": "true",
                 "WHISPER_LANGUAGE": "French",
+                "TRANSLATION_ROOT": "/tmp/translation",
+                "TARGET_LANGUAGE": "English",
+                "TRANSLATION_MODEL": "gpt-test",
             },
             clear=False,
         ):
@@ -25,6 +28,9 @@ class SettingsTests(unittest.TestCase):
         self.assertEqual(settings.segment_length_seconds, 90)
         self.assertTrue(settings.use_mock)
         self.assertEqual(settings.language, "French")
+        self.assertEqual(settings.translation_root, "/tmp/translation")
+        self.assertEqual(settings.target_language, "English")
+        self.assertEqual(settings.translation_model, "gpt-test")
 
     def test_override_settings_applies_types(self) -> None:
         settings = load_settings()
@@ -33,11 +39,13 @@ class SettingsTests(unittest.TestCase):
             segment_length_seconds="30",
             use_mock="true",
             whisper_model="tiny",
+            target_language="Spanish",
         )
 
         self.assertEqual(updated.segment_length_seconds, 30)
         self.assertTrue(updated.use_mock)
         self.assertEqual(updated.whisper_model, "tiny")
+        self.assertEqual(updated.target_language, "Spanish")
 
 
 if __name__ == "__main__":
