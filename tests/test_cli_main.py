@@ -32,6 +32,10 @@ class CliMainTests(unittest.TestCase):
                 "gpt-test",
                 "--translation-api-key",
                 "secret",
+                "--translation-max-retries",
+                "5",
+                "--translation-retry-base-delay-seconds",
+                "1.5",
                 "--translation-context",
                 "keep cultural references",
                 "--translation-prompt-version",
@@ -44,6 +48,8 @@ class CliMainTests(unittest.TestCase):
         self.assertEqual(args.translation_provider, "gemini")
         self.assertEqual(args.translation_model, "gpt-test")
         self.assertEqual(args.translation_api_key, "secret")
+        self.assertEqual(args.translation_max_retries, "5")
+        self.assertEqual(args.translation_retry_base_delay_seconds, "1.5")
         self.assertEqual(args.translation_context, "keep cultural references")
         self.assertEqual(args.translation_prompt_version, "v2")
 

@@ -30,6 +30,8 @@ class Settings:
     translation_provider: str
     translation_model: str
     translation_api_key: str
+    translation_max_retries: int
+    translation_retry_base_delay_seconds: float
     translation_context: str
     translation_prompt_version: str
     use_mock: bool
@@ -85,8 +87,12 @@ def load_settings() -> Settings:
         source_variant=env("SOURCE_VARIANT", ""),
         target_language=env("TARGET_LANGUAGE", "French"),
         translation_provider=env("TRANSLATION_PROVIDER", "openai"),
-        translation_model=env("TRANSLATION_MODEL", "gpt-4.1-mini"),
+        translation_model=env("TRANSLATION_MODEL", "gpt-5-mini"),
         translation_api_key=env("TRANSLATION_API_KEY", ""),
+        translation_max_retries=int(env("TRANSLATION_MAX_RETRIES", "0")),
+        translation_retry_base_delay_seconds=float(
+            env("TRANSLATION_RETRY_BASE_DELAY_SECONDS", "2.0")
+        ),
         translation_context=env("TRANSLATION_CONTEXT", ""),
         translation_prompt_version=env("TRANSLATION_PROMPT_VERSION", "v1"),
         use_mock=env("USE_MOCK", "false").lower() == "true",
@@ -100,6 +106,10 @@ def override_settings(settings: Settings, **kwargs: Optional[str]) -> Settings:
             continue
         if key == "segment_length_seconds":
             data[key] = int(value)
+        elif key == "translation_max_retries":
+            data[key] = int(value)
+        elif key == "translation_retry_base_delay_seconds":
+            data[key] = float(value)
         elif key == "use_mock":
             data[key] = str(value).lower() == "true"
         else:

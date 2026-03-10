@@ -60,6 +60,8 @@ Variables principales:
 - `TRANSLATION_PROVIDER`
 - `TRANSLATION_MODEL`
 - `TRANSLATION_API_KEY`
+- `TRANSLATION_MAX_RETRIES`
+- `TRANSLATION_RETRY_BASE_DELAY_SECONDS`
 - `TRANSLATION_CONTEXT`
 - `TRANSLATION_PROMPT_VERSION`
 
@@ -104,6 +106,8 @@ Notes:
 - utilise `WHISPER_LANGUAGE` comme langue source generale
 - utilise `SOURCE_VARIANT` pour preciser un dialecte, par exemple `tunisian_arabic`
 - utilise `TRANSLATION_CONTEXT` pour injecter du contexte metier/culturel libre
+- par defaut, la traduction utilise `gpt-5-mini`
+- les appels retry uniquement sur erreurs transitoires (`429`, `408`, `409`, `5xx`, timeout/connexion)
 
 ### 5) Merge
 ```bash

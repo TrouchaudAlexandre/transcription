@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+
 from transcription.domain.interfaces.translation_engine import TranslationEngine
 
 
@@ -9,10 +11,14 @@ class OpenAITranslationEngine(TranslationEngine):
         model: str,
         api_key: str,
         prompt_version: str = "v1",
+        max_retries: int = 3,
+        retry_base_delay_seconds: float = 2.0,
     ) -> None:
         self._model = model
         self._api_key = api_key
         self._prompt_version = prompt_version
+        self._max_retries = max(0, max_retries)
+        self._retry_base_delay_seconds = max(0.0, retry_base_delay_seconds)
 
     def translate_srt_segment(
         self,
@@ -23,20 +29,45 @@ class OpenAITranslationEngine(TranslationEngine):
         translation_context: str,
     ) -> str:
         client = self._create_client()
-        response = client.responses.create(
-            model=self._model,
-            instructions=self._instructions(
-                source_language,
-                source_variant,
-                target_language,
-                translation_context,
-            ),
-            input=source_srt,
+        response = self._create_response(
+            client=client,
+            source_srt=source_srt,
+            source_language=source_language,
+            source_variant=source_variant,
+            target_language=target_language,
+            translation_context=translation_context,
         )
         output_text = getattr(response, "output_text", "").strip()
         if not output_text:
             raise RuntimeError("OpenAI translation returned an empty response")
         return self._sanitize_output(output_text)
+
+    def _create_response(
+        self,
+        client,
+        source_srt: str,
+        source_language: str,
+        source_variant: str,
+        target_language: str,
+        translation_context: str,
+    ):
+        for attempt in range(self._max_retries + 1):
+            try:
+                return client.responses.create(
+                    model=self._model,
+                    instructions=self._instructions(
+                        source_language,
+                        source_variant,
+                        target_language,
+                        translation_context,
+                    ),
+                    input=source_srt,
+                )
+            except Exception as exc:
+                if not self._is_retryable_error(exc) or attempt >= self._max_retries:
+                    raise
+                time.sleep(self._retry_delay_seconds(attempt))
+        raise RuntimeError("OpenAI translation retry loop exited unexpectedly")
 
     def _create_client(self):
         try:
@@ -83,3 +114,26 @@ class OpenAITranslationEngine(TranslationEngine):
                 lines = lines[:-1]
             cleaned = "\n".join(lines).strip()
         return cleaned
+
+    def _retry_delay_seconds(self, attempt: int) -> float:
+        return self._retry_base_delay_seconds * (2**attempt)
+
+    @staticmethod
+    def _is_retryable_error(exc: Exception) -> bool:
+        status_code = getattr(exc, "status_code", None)
+        if status_code is None:
+            status_code = getattr(exc, "status", None)
+        if status_code in (408, 409, 429):
+            return True
+        if isinstance(status_code, int) and status_code >= 500:
+            return True
+
+        message = str(exc).lower()
+        retryable_markers = (
+            "timeout",
+            "temporarily unavailable",
+            "connection",
+            "rate limit",
+            "server error",
+        )
+        return any(marker in message for marker in retryable_markers)

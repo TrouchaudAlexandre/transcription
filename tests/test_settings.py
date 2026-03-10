@@ -36,6 +36,8 @@ class SettingsTests(unittest.TestCase):
         self.assertEqual(settings.target_language, "English")
         self.assertEqual(settings.translation_provider, "mistral")
         self.assertEqual(settings.translation_model, "gpt-test")
+        self.assertEqual(settings.translation_max_retries, 3)
+        self.assertEqual(settings.translation_retry_base_delay_seconds, 2.0)
         self.assertEqual(settings.translation_context, "dialect content")
 
     def test_override_settings_applies_types(self) -> None:
@@ -48,6 +50,8 @@ class SettingsTests(unittest.TestCase):
             source_variant="levantine_arabic",
             target_language="Spanish",
             translation_provider="gemini",
+            translation_max_retries="5",
+            translation_retry_base_delay_seconds="1.5",
             translation_context="keep local idioms natural",
         )
 
@@ -57,6 +61,8 @@ class SettingsTests(unittest.TestCase):
         self.assertEqual(updated.source_variant, "levantine_arabic")
         self.assertEqual(updated.target_language, "Spanish")
         self.assertEqual(updated.translation_provider, "gemini")
+        self.assertEqual(updated.translation_max_retries, 5)
+        self.assertEqual(updated.translation_retry_base_delay_seconds, 1.5)
         self.assertEqual(updated.translation_context, "keep local idioms natural")
 
 

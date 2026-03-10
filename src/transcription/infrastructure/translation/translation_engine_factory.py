@@ -16,5 +16,7 @@ class TranslationEngineFactory:
                 model=settings.translation_model,
                 api_key=settings.translation_api_key,
                 prompt_version=settings.translation_prompt_version,
+                max_retries=settings.translation_max_retries,
+                retry_base_delay_seconds=settings.translation_retry_base_delay_seconds,
             )
         raise RuntimeError(f"Unsupported translation provider: {settings.translation_provider}")

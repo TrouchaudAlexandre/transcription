@@ -56,6 +56,7 @@ os.chdir(PROJECT_DIR)
 # - TARGET_LANGUAGE
 # - SOURCE_VARIANT
 # - TRANSLATION_CONTEXT
+# - TRANSLATION_MODEL=gpt-5-mini
 
 # 3) Lancer les etapes du pipeline
 !PYTHONPATH=src python -m transcription.cli.main --step download

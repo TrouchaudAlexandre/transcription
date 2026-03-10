@@ -31,6 +31,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--translation-provider")
     parser.add_argument("--translation-model")
     parser.add_argument("--translation-api-key")
+    parser.add_argument("--translation-max-retries")
+    parser.add_argument("--translation-retry-base-delay-seconds")
     parser.add_argument("--translation-context")
     parser.add_argument("--translation-prompt-version")
     parser.add_argument("--use-mock")
@@ -67,6 +69,8 @@ def main() -> None:
         translation_provider=args.translation_provider,
         translation_model=args.translation_model,
         translation_api_key=args.translation_api_key,
+        translation_max_retries=args.translation_max_retries,
+        translation_retry_base_delay_seconds=args.translation_retry_base_delay_seconds,
         translation_context=args.translation_context,
         translation_prompt_version=args.translation_prompt_version,
         use_mock=args.use_mock,
